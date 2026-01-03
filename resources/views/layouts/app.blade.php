@@ -59,6 +59,22 @@
                             <li><a class="nav-link" href="{{ route('roles.index') }}">Manage Role</a></li>
                             <li><a class="nav-link" href="{{ route('products.index') }}">Manage Product</a></li>
                             <li><a class="nav-link" href="{{ route('categories.index') }}">Manage Category</a></li>
+                            {{-- <li><a class="nav-link" href="{{ route('notifications.index') }}">Manage Notifications</a></li> --}}
+                            {{-- notifications --}}
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
+                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Notification <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                    @foreach (auth()->user()->notifications as $notification)
+                                        <div class="dropdown-item">
+                                            {{ $notification->data['title'] ?? 'No title' }}
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                            </li>
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>

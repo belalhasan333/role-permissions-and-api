@@ -1,13 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\WEB;
 
+use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
+use App\Notifications\NotifyUser;
+use Spatie\Permission\Models\Role;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 class ProductController extends Controller
 {
@@ -34,6 +40,8 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $user = User::role('subscriber')->get();
+        
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title'       => 'required|string|max:255',
@@ -56,7 +64,7 @@ class ProductController extends Controller
             }
         }
 
-        Product::create([
+            $product=Product::create([
             'category_id' => $request->category_id,
             'title'       => $request->title,
             'description' => $request->description ?? '',
@@ -64,7 +72,10 @@ class ProductController extends Controller
             'status'      => $request->status,
             'medias'      => $medias,
         ]);
-
+    //         $response = Http::post(route('api.notify-subscribers'), [
+    //     'product_id' => $product->id,
+    // ]);
+        Notification::send($user, new NotifyUser($product));
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Events\MessageSend;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -14,8 +15,39 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        // filtering for params
+       $query = Product::query();
+
+        // Category filter
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+
+        //Price filter
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        // Keyword search
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $order  = $request->get('order', 'desc');
+
+        $products = $query->orderBy($sortBy, $order)->paginate(10);
+
+        return response()->json($products);
+
+
         $products = Product::latest()->get();
 
         return $this->sendResponse($products, 'Products retrieved successfully.');
@@ -26,6 +58,8 @@ class ProductController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+
+        // validation for store
         $validator = Validator::make($request->all(), [
             'category_id' => 'required|integer',
             'title'       => 'required|string|max:255',

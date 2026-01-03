@@ -62,7 +62,7 @@
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Description:</strong>
-                    <textarea class="form-control" style="height:150px" name="description" placeholder="Enter description" required>{{ old('description') }}</textarea>
+                    <textarea class="form-control" style="height:150px" name="description" placeholder="Enter description">{{ old('description') }}</textarea>
                 </div>
             </div>
 
@@ -76,16 +76,18 @@
             </div>
 
             {{-- Status --}}
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group">
-                    <strong>Status:</strong>
-                    <select name="status" class="form-control">
-                        <option value="">-- Select Status --</option>
-                        <option value="1" {{ old('status') == '1' ? 'selected' : '' }}>Active</option>
-                        <option value="0" {{ old('status') == '0' ? 'selected' : '' }}>Inactive</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <strong>Status:</strong>
+                <select name="status" class="form-control" required>
+                    <option value="">-- Select Status --</option>
+                    <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                    <option value="inactive" {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                </select>
+                @error('status')
+                    <span class="text-danger">{{ $message }}</span>
+                @enderror
             </div>
+
 
             {{-- Product Image --}}
             <div class="col-xs-12 col-sm-12 col-md-12">

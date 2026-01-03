@@ -1,13 +1,17 @@
 <?php
 
+namespace App\Http\Controllers\WEB;
+
 use App\Models\Category;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\RoleController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\API\TestController ;
+use App\Http\Controllers\WEB\RoleController;
+use App\Http\Controllers\WEB\UserController;
+use App\Http\Controllers\WEB\ProductController;
+use App\Http\Controllers\WEB\CategoryController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,4 +26,12 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('users', UserController::class);
     Route::resource('products', ProductController::class);
     Route::resource('categories', CategoryController::class);
+    // notifications
+    Route::get('sent-testenrollment', [TestController::class, 'sentTestNotification']);
+    //  notifications
+    // Route::get('notifications', [APITestController::class, 'index'])->name('notifications.index');
+    // Route::post('notifications/send', [APITestController::class, 'sentTestNotification'])->name('notifications.send');
+    // Route::delete('notifications/{id}', [APITestController::class, 'destroy'])->name('notifications.destroy');
+    Route::resource('notifications', TestController::class);
+
 });

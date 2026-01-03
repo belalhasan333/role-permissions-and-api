@@ -14,8 +14,33 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
+        $user = Category::query();
+        if ($request->filled('title')) {
+            $user->where('title', $request->title);
+        }
+        // Keyword search
+        if ($request->filled('keyword')) {
+            $user->where('name', 'like', '%' . $request->keyword . '%');
+        }
+        // descriptions
+        if ($request->filled('description')) {
+            $user->where('description', $request->description);
+        }
+        // medias
+        if ($request->filled('medias')) {
+            $user->where('medias', $request->medias);
+        }
+
+        // Sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $order  = $request->get('order', 'desc');
+
+        $category = $user->orderBy($sortBy, $order)->paginate(10);
+
+        return response()->json($category);
+
         $categories = Category::latest()->get();
 
         return $this->sendResponse($categories, 'Categories retrieved successfully.');

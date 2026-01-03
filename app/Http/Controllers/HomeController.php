@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -23,6 +24,11 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $user = User::all();
         return view('home');
+
+        $notifications = auth()->user()->notifications()->latest()->get();
+
+        return view('dashboard', compact('notifications'));
     }
 }

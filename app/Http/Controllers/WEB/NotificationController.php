@@ -1,0 +1,53 @@
+<?php
+
+namespace App\Http\Controllers\WEB;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Notifications\TestEnrollment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Auth;
+
+class NotificationController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    // notification list
+    public function index()
+    {
+        $notifications = Auth::user()->notifications()->latest()->paginate(10);
+        return view('notifications.index', compact('notifications'));
+    }
+
+    //  send email-notification
+    public function send(Request $request)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+
+        $users = User::all();
+
+        $data = [
+            'title' => $request->message,
+            'enrollmentText' => 'View Content',
+            'url' => url('/'),
+            'thankyou' => 'You have a new notification',
+        ];
+
+        Notification::send($users, new TestEnrollment($data));
+
+        return redirect()->route('notifications.index')->with('success','Notification sent successfully.');
+    }
+
+    // Delete notification
+    public function destroy($id)
+    {
+        Auth::user()->notifications()->where('id', $id)->firstOrFail()->delete();
+        return redirect()->route('notifications.index')->with('success','Notification deleted successfully.');
+    }
+}

@@ -2,20 +2,22 @@
 
 namespace App\Http\Controllers\API;
 
-use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 use App\Http\Models\user;
 use Illuminate\Support\Facades\Route;
+
+use PHPOpenSourceSaver\JWTAuth\JWTGuard;
 use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\API\TestController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\CategoryController;
-
+// use App\Http\Controllers\WEB\NotificationController;
 
 Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 
-    Route::middleware('auth:api')->group(function () {
+    Route::middleware('jwt.auth')->group(function () {
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('refresh', [AuthController::class, 'refresh']);
         // profile
@@ -25,8 +27,13 @@ Route::prefix('auth')->group(function () {
         Route::delete('profile', [ProfileController::class, 'deleteAccount']);
 
         // categories
-        Route::resource('categories', CategoryController::class);
+        Route::apiResource('categories', CategoryController::class);
         // products
-        Route::apiResource('products', ProductController::class); // its go web product controller
+        Route::apiResource('products', ProductController::class);
+        // notify all users
+        // Route::get('notify',NotificationController::class, 'index');
+        // Route::post('/notify-subscribers', [NotificationController::class, 'notify'])->name('notify-subscribers');
+        Route::get('notifications', [TestController::class, 'index']);
+        Route::post('notifications/send', [TestController::class, 'sentTestNotification']);
     });
 });
