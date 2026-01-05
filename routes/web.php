@@ -33,5 +33,11 @@ Route::group(['middleware' => ['auth']], function () {
     // Route::post('notifications/send', [APITestController::class, 'sentTestNotification'])->name('notifications.send');
     // Route::delete('notifications/{id}', [APITestController::class, 'destroy'])->name('notifications.destroy');
     Route::resource('notifications', TestController::class);
+        Route::get('/notification/read/{id}', [NotificationController::class, 'read'])
+        ->name('notifications.read');
+
+    Route::get('/notification/mark-all-read', [NotificationController::class, 'markAllRead'])
+        ->name('notifications.markAllRead');
 
 });
+

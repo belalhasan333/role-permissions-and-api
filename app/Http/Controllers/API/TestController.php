@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\User;
-use App\Notifications\TestEnrollment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+
+use App\Notifications\TestEnrollment;
 use Illuminate\Support\Facades\Notification;
 
 class TestController extends Controller
@@ -15,16 +16,78 @@ class TestController extends Controller
         $this->middleware('jwt.auth');
     }
 
-    // notifications
+
     public function index(Request $request)
     {
         $user = $request->user();
+
         return response()->json([
-            'notifications' => $user->notifications()->latest()->get()
+            'status' => true,
+            'message' => 'Recent notifications retrieved successfully.',
+            'code' => 200,
+            'data' => [
+                'has_unread_notifications' => $user->unreadNotifications()->exists(),
+                'notifications' => $user->notifications()
+                    ->latest()
+                    ->get()
+                    ->map(function ($notification) {
+                        return [
+                            'id' => $notification->id,
+                            'type' => $notification->type,
+                            'notifiable_type' => $notification->notifiable_type,
+                            'notifiable_id' => $notification->notifiable_id,
+                            'data' => $notification->data,
+                            'read_at' => $notification->read_at,
+                            'created_at' => $notification->created_at,
+                            'updated_at' => $notification->updated_at,
+                        ];
+                    }),
+            ],
+        ], 200);
+    }
+
+
+    // notification read
+    public function markAsRead($id)
+    {
+        $user = auth()->user();
+
+        $notification = $user->notifications()
+            ->where('id', $id)
+            ->first();
+
+        if (!$notification) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Notification not found',
+                'code' => 404
+            ], 404);
+        }
+
+        $notification->markAsRead();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Notification read successfully.',
+            'code' => 200
+        ]);
+    }
+
+    public function markAllAsRead(Request $request)
+    {
+        $request->user()
+            ->unreadNotifications
+            ->markAsRead();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'All notifications marked as read',
+            'code' => 200
         ]);
     }
 
 
+    // Send test notification
     public function sentTestNotification()
     {
         $users = User::all();
@@ -44,10 +107,14 @@ class TestController extends Controller
         ]);
     }
 
-
+    // Delete notification
     public function destroy($id)
     {
-        auth()->user()->notifications()->where('id', $id)->firstOrFail()->delete();
+        auth()->user()
+            ->notifications()
+            ->where('id', $id)
+            ->firstOrFail()
+            ->delete();
 
         return response()->json([
             'success' => true,

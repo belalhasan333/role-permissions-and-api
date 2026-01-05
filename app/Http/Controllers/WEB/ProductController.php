@@ -41,7 +41,7 @@ class ProductController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $user = User::role('subscriber')->get();
-        
+
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title'       => 'required|string|max:255',
@@ -93,6 +93,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
+        $user = User::role('subscriber')->get();
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title'       => 'required|string|max:255',
@@ -125,6 +126,7 @@ class ProductController extends Controller
             'status'      => $request->status,
             'medias'      => $medias,
         ]);
+        Notification::send($user, new NotifyUser($product));
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }

@@ -27,13 +27,18 @@ Route::prefix('auth')->group(function () {
         Route::delete('profile', [ProfileController::class, 'deleteAccount']);
 
         // categories
-        Route::apiResource('categories', CategoryController::class);
+        // Route::apiResource('categories', CategoryController::class);
         // products
-        Route::apiResource('products', ProductController::class);
+        // Route::apiResource('products', ProductController::class);
         // notify all users
         // Route::get('notify',NotificationController::class, 'index');
         // Route::post('/notify-subscribers', [NotificationController::class, 'notify'])->name('notify-subscribers');
-        Route::get('notifications', [TestController::class, 'index']);
+        Route::get('/v1/notifications', [TestController::class, 'index']);
+
+       Route::post('/v1/notifications/read/{id}', [TestController::class, 'markAsRead']);
+
+        Route::post('/v1/notifications/read-all', [TestController::class, 'markAllAsRead']);
+
         Route::post('notifications/send', [TestController::class, 'sentTestNotification']);
     });
 });

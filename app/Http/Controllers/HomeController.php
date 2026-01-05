@@ -25,10 +25,10 @@ class HomeController extends Controller
     public function index()
     {
         $user = User::all();
-        return view('home');
+
 
         $notifications = auth()->user()->notifications()->latest()->get();
 
-        return view('dashboard', compact('notifications'));
+        return view('home', compact('notifications'));
     }
 }

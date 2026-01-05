@@ -23,6 +23,25 @@ class NotificationController extends Controller
         return view('notifications.index', compact('notifications'));
     }
 
+    public function read($id)
+    {
+        $notification = auth()->user()
+            ->notifications()
+            ->where('id', $id)
+            ->firstOrFail();
+
+        $notification->markAsRead();
+
+        return back();
+    }
+
+    public function markAllRead()
+    {
+        auth()->user()->unreadNotifications->markAsRead();
+
+        return back();
+    }
+
     //  send email-notification
     public function send(Request $request)
     {
@@ -41,13 +60,13 @@ class NotificationController extends Controller
 
         Notification::send($users, new TestEnrollment($data));
 
-        return redirect()->route('notifications.index')->with('success','Notification sent successfully.');
+        return redirect()->route('notifications.index')->with('success', 'Notification sent successfully.');
     }
 
     // Delete notification
     public function destroy($id)
     {
         Auth::user()->notifications()->where('id', $id)->firstOrFail()->delete();
-        return redirect()->route('notifications.index')->with('success','Notification deleted successfully.');
+        return redirect()->route('notifications.index')->with('success', 'Notification deleted successfully.');
     }
 }

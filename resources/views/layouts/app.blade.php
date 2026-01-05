@@ -61,20 +61,54 @@
                             <li><a class="nav-link" href="{{ route('categories.index') }}">Manage Category</a></li>
                             {{-- <li><a class="nav-link" href="{{ route('notifications.index') }}">Manage Notifications</a></li> --}}
                             {{-- notifications --}}
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    Notification <span class="caret"></span>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    @foreach (auth()->user()->notifications as $notification)
-                                        <div class="dropdown-item">
-                                            {{ $notification->data['title'] ?? 'No title' }}
-                                        </div>
-                                    @endforeach
-                                </div>
+                            @php
+                                $unreadCount = auth()->user()->unreadNotifications->count();
+                            @endphp
 
+                            <li class="nav-item dropdown">
+                                <a id="notificationDropdown" class="nav-link position-relative" href="#"
+                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+                                    <i class="fa-solid fa-bell"></i>
+
+                                    @if ($unreadCount > 0)
+                                        <span
+                                            class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                            {{ $unreadCount }}
+                                        </span>
+                                    @endif
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-end p-2" style="width: 300px">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong>Notifications</strong>
+
+                                        @if ($unreadCount > 0)
+                                            <a href="{{ route('notifications.markAllRead') }}"
+                                                class="text-sm text-decoration-none text-red-400">
+                                                Mark all read
+                                            </a>
+                                        @endif
+                                    </div>
+
+                                    <hr>
+
+                                    @forelse (auth()->user()->notifications->take(5) as $notification)
+                                        <a href="{{ route('notifications.read', $notification->id) }}"
+                                            class="dropdown-item {{ $notification->read_at ? '' : 'fw-bold' }}">
+
+                                            {{ $notification->data['title'] ?? 'Notification' }}
+
+                                            @if (!$notification->read_at)
+                                                <span class="badge bg-primary ms-2">New</span>
+                                            @endif
+                                        </a>
+                                    @empty
+                                        <div class="dropdown-item text-muted">No notifications</div>
+                                    @endforelse
+                                </div>
                             </li>
+
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
                                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>

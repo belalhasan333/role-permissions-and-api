@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\WEB;
 
+use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Notifications\NotifyUser;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Notification;
 
 class CategoryController extends Controller
 {
@@ -56,6 +59,8 @@ class CategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        $user = User::role('subscriber')->get();
+
         $request->validate([
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -84,11 +89,12 @@ class CategoryController extends Controller
             }
         }
 
-        Category::create([
+        $category = Category::create([
             'title'       => $request->title,
             'description' => $request->description ?? '',
             'medias'      => $medias,
         ]);
+        Notification::send($user, new NotifyUser($category));
 
         return redirect()->route('categories.index')
             ->with('success', 'category created successfully.');
