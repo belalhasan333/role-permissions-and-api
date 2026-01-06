@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 
 use App\Notifications\TestEnrollment;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class TestController extends Controller
 {
@@ -20,7 +22,7 @@ class TestController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-
+        // dd($user);
         return response()->json([
             'status' => true,
             'message' => 'Recent notifications retrieved successfully.',
@@ -46,20 +48,17 @@ class TestController extends Controller
         ], 200);
     }
 
-
     // notification read
     public function markAsRead($id)
     {
-        $user = auth()->user();
+        $user = Auth::user();
 
-        $notification = $user->notifications()
-            ->where('id', $id)
-            ->first();
+        $notification = $user->unreadNotifications()->find($id);
 
         if (!$notification) {
             return response()->json([
                 'status' => false,
-                'message' => 'Notification not found',
+                'message' => 'Notification already read',
                 'code' => 404
             ], 404);
         }
@@ -78,6 +77,7 @@ class TestController extends Controller
         $request->user()
             ->unreadNotifications
             ->markAsRead();
+        // dd($request);
 
         return response()->json([
             'status' => true,
@@ -103,14 +103,14 @@ class TestController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Notification sent successfully'
+            'message' => 'Email sent successfully'
         ]);
     }
 
     // Delete notification
     public function destroy($id)
     {
-        auth()->user()
+        Auth::user()
             ->notifications()
             ->where('id', $id)
             ->firstOrFail()

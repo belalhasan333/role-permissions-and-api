@@ -1,38 +1,39 @@
-@extends('layouts.app')
+@extends('master')
 
 @section('content')
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left">
-            <h2>Edit Category</h2>
-        </div>
-        <div class="pull-right">
-            <a class="btn btn-primary btn-sm mb-2" href="{{ route('categories.index') }}"><i class="fa fa-arrow-left"></i> Back</a>
-        </div>
-    </div>
-</div>
-
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <strong>Whoops!</strong> There were some problems with your input.<br><br>
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-
-<form action="{{ route('categories.update',$category->id) }}" method="POST" enctype="multipart/form-data">
-    @csrf
-    @method('PUT')
-
     <div class="row">
-    {{-- Title --}}
+        <div class="col-lg-12 margin-tb">
+            <div class="pull-left">
+                <h2>Edit Category</h2>
+            </div>
+            <div class="pull-right">
+                <a class="btn btn-primary btn-sm mb-2" href="{{ route('categories.index') }}"><i class="fa fa-arrow-left"></i>
+                    Back</a>
+            </div>
+        </div>
+    </div>
+
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <strong>Whoops!</strong> There were some problems with your input.<br><br>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <form action="{{ route('categories.update', $category->id) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+        <div class="row">
+            {{-- Title --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Title:</strong>
-                    <input type="text" name="title" value="{{ old('title',$category->title) }}" class="form-control"
+                    <input type="text" name="title" value="{{ old('title', $category->title) }}" class="form-control"
                         placeholder="Enter title">
                 </div>
             </div>
@@ -41,24 +42,22 @@
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Description:</strong>
-                    <textarea class="form-control" style="height:150px" name="description" placeholder="Enter description">{{ old('description',$category->description) }}</textarea>
+                    <textarea class="form-control" id="description" style="height:150px" name="description" placeholder="Enter description">{{ old('description', $category->description) }}</textarea>
                 </div>
             </div>
 
             {{-- Status --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                        <select name="status" class="form-control">
-                            <option value="">-- Select Status --</option>
-                            <option value="active"
-                                {{ old('status', $category->status) == 'active' ? 'selected' : '' }}>
-                                Active
-                            </option>
-                            <option value="inactive"
-                                {{ old('status', $category->status) == 'inactive' ? 'selected' : '' }}>
-                                Inactive
-                            </option>
-                        </select>
+                    <select name="status" class="form-control">
+                        <option value="">-- Select Status --</option>
+                        <option value="active" {{ old('status', $category->status) == 'active' ? 'selected' : '' }}>
+                            Active
+                        </option>
+                        <option value="inactive" {{ old('status', $category->status) == 'inactive' ? 'selected' : '' }}>
+                            Inactive
+                        </option>
+                    </select>
                 </div>
             </div>
 
@@ -70,11 +69,34 @@
                 </div>
             </div>
 
-        <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-          <button type="submit" class="btn btn-primary btn-sm mb-2 mt-2"><i class="fa-solid fa-floppy-disk"></i> Submit</button>
+            <div class="col-xs-12 col-sm-12 col-md-12 text-center">
+                <button type="submit" class="btn btn-primary btn-sm mb-2 mt-2"><i class="fa-solid fa-floppy-disk"></i>
+                    Submit</button>
+            </div>
         </div>
-    </div>
-</form>
+    </form>
 
-<p class="text-center text-primary"><small>Belal Hasan</small></p>
+    <p class="text-center text-primary"><small>Belal Hasan</small></p>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#description'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', 'bulletedList', 'numberedList',
+                        '|', 'outdent', 'indent', '|', 'undo', 'redo'
+                    ]
+                },
+                language: 'en',
+                height: 350
+            })
+            .catch(error => {
+                console.error('CKEditor error:', error);
+            });
+    </script>
+@endpush

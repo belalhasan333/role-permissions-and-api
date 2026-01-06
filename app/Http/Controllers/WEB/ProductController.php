@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Notifications\NotifyUser;
 use Spatie\Permission\Models\Role;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Notification;
 
 class ProductController extends Controller
@@ -25,13 +27,68 @@ class ProductController extends Controller
         $this->middleware('permission:product-delete', ['only' => ['destroy']]);
     }
 
-    public function index(): View
+    public function data()
     {
-        $products = Product::latest()->paginate(5);
-        return view('products.index', compact('products'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+        $products = Product::with('category')->latest();
+
+        return DataTables::of($products)
+            ->addIndexColumn()
+            ->addColumn('category_name', function ($product) {
+                return $product->category ? $product->category->title : '<span class="text-muted">N/A</span>';
+            })
+            ->addColumn('description', function ($product) {
+                return Str::limit(strip_tags($product->description), 60, '...');
+            })
+            ->addColumn('price', function ($product) {
+                return number_format($product->price, 2);
+            })
+            ->addColumn('status', function ($product) {
+                $badge = $product->status === 'active'
+                    ? 'bg-success'
+                    : 'bg-danger';
+                return '<span class="badge ' . $badge . '">' . ucfirst($product->status) . '</span>';
+            })
+            ->addColumn('media', function ($product) {
+                if (!empty($product->medias) && is_array($product->medias)) {
+                    $first = $product->medias[0] ?? null;
+                    if ($first && isset($first['url'])) {
+                        return '<img src="' . $first['url'] . '" alt="product" style="max-width:90px; border-radius:6px; object-fit:cover;">';
+                    }
+                }
+                return '<span class="text-muted">No image</span>';
+            })
+            ->addColumn('action', function ($product) {
+                $btn = '';
+
+                $btn .= '<a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-1">
+                            <i class="fa-solid fa-list"></i> Show
+                         </a>';
+
+                if (auth()->user()->can('product-edit')) {
+                    $btn .= '<a href="' . route('products.edit', $product->id) . '" class="btn btn-primary btn-sm me-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                              </a>';
+                }
+
+                if (auth()->user()->can('product-delete')) {
+                    $btn .= '<form action="' . route('products.destroy', $product->id) . '" method="POST" style="display:inline;">
+                                ' . csrf_field() . method_field('DELETE') . '
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Are you sure to delete this product?\')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                             </form>';
+                }
+
+                return $btn;
+            })
+            ->rawColumns(['media', 'action', 'status', 'category_name', 'description'])
+            ->make(true);
     }
 
+    public function index(): View
+    {
+        return view('products.index');
+    }
     public function create(): View
     {
         $categories = Category::where('status', 'active')->get();
@@ -64,7 +121,7 @@ class ProductController extends Controller
             }
         }
 
-            $product=Product::create([
+        $product = Product::create([
             'category_id' => $request->category_id,
             'title'       => $request->title,
             'description' => $request->description ?? '',
@@ -72,9 +129,9 @@ class ProductController extends Controller
             'status'      => $request->status,
             'medias'      => $medias,
         ]);
-    //         $response = Http::post(route('api.notify-subscribers'), [
-    //     'product_id' => $product->id,
-    // ]);
+        //         $response = Http::post(route('api.notify-subscribers'), [
+        //     'product_id' => $product->id,
+        // ]);
         Notification::send($user, new NotifyUser($product));
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }

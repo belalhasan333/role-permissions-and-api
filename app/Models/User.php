@@ -11,9 +11,21 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable implements JWTSubject
 {
-     use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
-    protected $fillable = ['name', 'email', 'password'];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'company',
+        'job',
+        'country',
+        'address',
+        'about',
+        'profile_image'
+    ];
+
     protected $hidden = ['password', 'remember_token'];
 
     public function getJWTIdentifier()
@@ -33,5 +45,4 @@ class User extends Authenticatable implements JWTSubject
             'password' => 'hashed',
         ];
     }
-
 }

@@ -1,58 +1,70 @@
-@extends('layouts.app')
+@extends('master')
 
 @section('content')
-<div class="row">
-    <div class="col-lg-12 margin-tb">
-        <div class="pull-left">
+    <div class="row mb-2">
+        <div class="col-md-6">
             <h2>Users Management</h2>
         </div>
-        <div class="pull-right">
-            <a class="btn btn-success mb-2" href="{{ route('users.create') }}"><i class="fa fa-plus"></i> Create New User</a>
+        <div class="col-md-6 text-end">
+            <a class="btn btn-success" href="{{ route('users.create') }}">Create New User</a>
         </div>
     </div>
-</div>
 
-@session('success')
-    <div class="alert alert-success" role="alert">
-        {{ $value }}
-    </div>
-@endsession
-
-<table class="table table-bordered">
-   <tr>
-       <th>No</th>
-       <th>Name</th>
-       <th>Email</th>
-       <th>Roles</th>
-       <th width="280px">Action</th>
-   </tr>
-   @foreach ($data as $key => $user)
-    <tr>
-        <td>{{ ++$i }}</td>
-        <td>{{ $user->name }}</td>
-        <td>{{ $user->email }}</td>
-        <td>
-          @if(!empty($user->getRoleNames()))
-            @foreach($user->getRoleNames() as $v)
-               <label class="badge bg-success">{{ $v }}</label>
-            @endforeach
-          @endif
-        </td>
-        <td>
-             <a class="btn btn-info btn-sm" href="{{ route('users.show',$user->id) }}"><i class="fa-solid fa-list"></i> Show</a>
-             <a class="btn btn-primary btn-sm" href="{{ route('users.edit',$user->id) }}"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
-              <form method="POST" action="{{ route('users.destroy', $user->id) }}" style="display:inline">
-                  @csrf
-                  @method('DELETE')
-
-                  <button type="submit" class="btn btn-danger btn-sm"><i class="fa-solid fa-trash"></i> Delete</button>
-              </form>
-        </td>
-    </tr>
- @endforeach
-</table>
-
-{!! $data->links('pagination::bootstrap-5') !!}
-
-<p class="text-center text-primary"><small>Belal Hasan</small></p>
+    <table class="table table-bordered" id="users-table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Roles</th>
+                <th width="200px">Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 @endsection
+
+@push('scripts')
+    {{-- js --}}
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(function() {
+            $('#users-table').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: '{!! route('users.data') !!}',
+                columns: [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false,
+                        className: 'text-center'
+                    },
+                    {
+                        data: 'name',
+                        name: 'name'
+                    },
+                    {
+                        data: 'email',
+                        name: 'email'
+                    },
+                    {
+                        data: 'roles',
+                        name: 'roles',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    }
+                ],
+                order: [
+                    [1, 'asc']
+                ]
+            });
+        });
+    </script>
+@endpush

@@ -6,11 +6,13 @@ use App\Models\User;
 use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Notifications\NotifyUser;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
+use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\Notification;
 
 class CategoryController extends Controller
@@ -32,19 +34,57 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(): View
+    public function data()
     {
-        $categories = Category::latest()->paginate(5);
+        $categories = Category::latest();
 
-        return view('categories.index', compact('categories'))
-            ->with('i', (request()->input('page', 1) - 1) * 5);
+        return DataTables::of($categories)
+            ->addIndexColumn()
+            ->addColumn('description', function ($category) {
+                return Str::limit($category->description, 50, '...');
+            })
+            ->addColumn('media', function ($category) {
+                if (!empty($category->medias) && is_array($category->medias)) {
+                    $firstMedia = $category->medias[0] ?? null;
+                    if ($firstMedia && isset($firstMedia['url'])) {
+                        return '<img src="' . $firstMedia['url'] . '" alt="media" style="max-width:80px; border-radius:4px;">';
+                    }
+                }
+                return '<span class="text-muted">No media</span>';
+            })
+            ->addColumn('action', function ($category) {
+                $btn = '';
+
+                $btn .= '<a href="' . route('categories.show', $category->id) . '" class="btn btn-info btn-sm">
+                            <i class="fa-solid fa-list"></i> Show
+                         </a>';
+
+                if (auth()->user()->can('category-edit')) {
+                    $btn .= ' <a href="' . route('categories.edit', $category->id) . '" class="btn btn-primary btn-sm">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                              </a>';
+                }
+
+                if (auth()->user()->can('category-delete')) {
+                    $btn .= '<form action="' . route('categories.destroy', $category->id) . '" method="POST" style="display:inline;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm(\'Are you sure?\')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                             </form>';
+                }
+
+                return $btn;
+            })
+            ->rawColumns(['media', 'action', 'description'])
+            ->make(true);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    public function index(): View
+    {
+        return view('categories.index');
+    }
     public function create(): View
     {
         $categories = Category::all();

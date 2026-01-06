@@ -7,43 +7,63 @@ use Illuminate\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\Models\Role;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Yajra\DataTables\Facades\DataTables;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 
 class UserController extends Controller
 {
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Display the Blade view with DataTable.
      */
-    public function index(Request $request): View
+    public function index(): View
     {
-        $data = User::latest()->paginate(5);
-
-        return view('users.index', compact('data'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        return view('users.index');
     }
 
     /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Fetch users data for DataTables.
+     */
+    public function getData(Request $request)
+    {
+        $users = User::with('roles')->select('users.*');
+
+        return DataTables::of($users)
+            ->addIndexColumn()
+            ->addColumn('roles', function ($user) {
+                $roles = '';
+                foreach ($user->getRoleNames() as $role) {
+                    $roles .= '<span class="badge bg-success me-1">' . $role . '</span>';
+                }
+                return $roles;
+            })
+            ->addColumn('action', function ($user) {
+                $show = '<a class="btn btn-info btn-sm" href="' . route('users.show', $user->id) . '">Show</a>';
+                $edit = '<a class="btn btn-primary btn-sm" href="' . route('users.edit', $user->id) . '">Edit</a>';
+                $delete = '<form method="POST" action="' . route('users.destroy', $user->id) . '" style="display:inline-block">'
+                    . csrf_field()
+                    . method_field('DELETE')
+                    . '<button type="submit" class="btn btn-danger btn-sm">Delete</button>'
+                    . '</form>';
+                return $show . ' ' . $edit . ' ' . $delete;
+            })
+            ->rawColumns(['roles', 'action'])
+            ->make(true);
+    }
+
+    /**
+     * Show the form for creating a new user.
      */
     public function create(): View
     {
         $roles = Role::pluck('name', 'name')->all();
-
         return view('users.create', compact('roles'));
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created user.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -65,23 +85,16 @@ class UserController extends Controller
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Show the specified user.
      */
     public function show($id): View
     {
         $user = User::find($id);
-
         return view('users.show', compact('user'));
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Show the form for editing the specified user.
      */
     public function edit($id): View
     {
@@ -93,11 +106,7 @@ class UserController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Update the specified user.
      */
     public function update(Request $request, $id): RedirectResponse
     {
@@ -112,13 +121,12 @@ class UserController extends Controller
         if (!empty($input['password'])) {
             $input['password'] = Hash::make($input['password']);
         } else {
-            $input = Arr::except($input, array('password'));
+            $input = Arr::except($input, ['password']);
         }
 
         $user = User::find($id);
         $user->update($input);
         DB::table('model_has_roles')->where('model_id', $id)->delete();
-
         $user->assignRole($request->input('roles'));
 
         return redirect()->route('users.index')
@@ -126,10 +134,7 @@ class UserController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Delete the specified user.
      */
     public function destroy($id): RedirectResponse
     {

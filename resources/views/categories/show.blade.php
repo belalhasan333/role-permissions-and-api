@@ -1,20 +1,20 @@
-@extends('layouts.app')
+@extends('master')
 
 @section('content')
-<div class="container">
-    <h2>Category Details</h2>
+    <div class="container">
+        <h2>Category Details</h2>
 
-    <p><strong>Title:</strong> {{ $category->title }}</p>
-    <p><strong>Description:</strong> {{ $category->description }}</p>
-    <p><strong>Status:</strong> {{ ucfirst($category->status) }}</p>
-    
-
-    <p><strong>Media:</strong> {{ json_encode($category->medias) }}</p>
+        <p><strong>Title:</strong> {{ $category->title }}</p>
+        <p><strong>Description:</strong> {{ $category->description }}</p>
+        <p><strong>Status:</strong> {{ ucfirst($category->status) }}</p>
 
 
+        <p><strong>Media:</strong> {{ json_encode($category->medias) }}</p>
 
-    <a href="{{ route('categories.index') }}" class="btn btn-primary btn-sm">
-        Back
-    </a>
-</div>
+
+
+        <a href="{{ route('categories.index') }}" class="btn btn-primary btn-sm">
+            Back
+        </a>
+    </div>
 @endsection

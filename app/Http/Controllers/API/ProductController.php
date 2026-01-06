@@ -59,7 +59,7 @@ class ProductController extends Controller
     public function store(Request $request): JsonResponse
     {
 
-        // validation for store
+        //  store
         $validator = Validator::make($request->all(), [
             'category_id' => 'required|integer',
             'title'       => 'required|string|max:255',

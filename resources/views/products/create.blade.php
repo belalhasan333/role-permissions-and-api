@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('master')
 
 @section('content')
     <div class="row">
@@ -62,7 +62,8 @@
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Description:</strong>
-                    <textarea class="form-control" style="height:150px" name="description" placeholder="Enter description">{{ old('description') }}</textarea>
+                    <textarea class="ckeditor form-control" id="editor" style="height:150px" name="description"
+                        placeholder="Enter description">{{ old('description') }}</textarea>
                 </div>
             </div>
 
@@ -111,3 +112,25 @@
         <small>Belal Hasan</small>
     </p>
 @endsection
+
+@push('scripts')
+    <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
+
+    <script>
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', 'bulletedList', 'numberedList',
+                        '|', 'outdent', 'indent', '|', 'undo', 'redo'
+                    ]
+                },
+                language: 'en',
+                height: 350
+            })
+            .catch(error => {
+                console.error('CKEditor error:', error);
+            });
+    </script>
+@endpush

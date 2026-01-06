@@ -10,6 +10,7 @@ use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Spatie\Permission\Models\Permission;
+use Yajra\DataTables\Facades\DataTables;
 
 class RoleController extends Controller
 {
@@ -31,11 +32,47 @@ class RoleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request): View
+    public function data()
     {
-        $roles = Role::orderBy('id', 'DESC')->paginate(5);
-        return view('roles.index', compact('roles'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
+        $roles = Role::select(['id', 'name', 'guard_name']);
+
+        return DataTables::of($roles)
+            ->addIndexColumn()
+            ->addColumn('action', function ($role) {
+                $btn = '';
+
+                $btn .= '<a href="' . route('roles.show', $role->id) . '"
+                         class="btn btn-info btn-sm me-1">
+                            <i class="fa-solid fa-list"></i> Show
+                         </a>';
+
+                if (auth()->user()->can('role-edit')) {
+                    $btn .= '<a href="' . route('roles.edit', $role->id) . '"
+                             class="btn btn-primary btn-sm me-1">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                             </a>';
+                }
+
+                if (auth()->user()->can('role-delete')) {
+                    $btn .= '<form action="' . route('roles.destroy', $role->id) . '" method="POST" style="display:inline;">
+                                ' . csrf_field() . '
+                                ' . method_field('DELETE') . '
+                                <button type="submit" class="btn btn-danger btn-sm"
+                                        onclick="return confirm(\'Are you sure to delete this role?\')">
+                                    <i class="fa-solid fa-trash"></i> Delete
+                                </button>
+                             </form>';
+                }
+
+                return $btn;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function index(): View
+    {
+        return view('roles.index');
     }
 
     /**
