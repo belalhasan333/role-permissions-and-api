@@ -47,7 +47,7 @@ class ProfileController extends Controller
             $user->profile_image = $imageName;
         }
 
-        // Update 
+        // Update
         $user->update($request->only([
             'name',
             'email',
@@ -96,6 +96,7 @@ class ProfileController extends Controller
 
         return redirect()->route('profile.index')->with('success', 'Password changed successfully');
     }
+
     public function updateImage(Request $request)
     {
         $request->validate([
@@ -104,15 +105,12 @@ class ProfileController extends Controller
 
         $user = Auth::user();
 
-        // old image
-        if ($user->profile_image) {
-            $oldPath = 'public/profile/' . $user->profile_image;
-            if (Storage::exists($oldPath)) {
-                Storage::delete($oldPath);
-            }
+        // Delete old image if exists
+        if ($user->profile_image && Storage::exists('public/profile/' . $user->profile_image)) {
+            Storage::delete('public/profile/' . $user->profile_image);
         }
 
-        // new image save
+        // Save new image
         $image = $request->file('profile_image');
         $imageName = time() . '_' . $image->getClientOriginalName();
         $image->storeAs('public/profile', $imageName);
@@ -120,7 +118,10 @@ class ProfileController extends Controller
         $user->profile_image = $imageName;
         $user->save();
 
-        return redirect()->route('profile.index')
-            ->with('success', 'Profile photo updated successfully!');
+        // Return JSON for Ajax
+        return response()->json([
+            'success' => true,
+            'profile_image_url' => asset('storage/profile/' . $imageName)
+        ]);
     }
 }

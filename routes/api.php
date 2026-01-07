@@ -23,9 +23,9 @@ Route::prefix('auth')->group(function () {
         Route::put('profile/password', [ProfileController::class, 'changePassword']);
         Route::delete('profile', [ProfileController::class, 'deleteAccount']);
 
-        Route::apiResource('categories', CategoryController::class);
-        Route::apiResource('products', ProductController::class);
-        Route::apiResource('users', UserController::class);
+        // Route::apiResource('categories', CategoryController::class);
+        // Route::apiResource('products', ProductController::class);
+        // Route::apiResource('users', UserController::class);
 
         Route::get('v1/notifications', [TestController::class, 'index']);
         Route::post('v1/notifications/read/{id}', [TestController::class, 'markAsRead']);
