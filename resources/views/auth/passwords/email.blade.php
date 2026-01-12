@@ -1,47 +1,63 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Reset Password') }}</div>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Forgot Password</title>
 
-                <div class="card-body">
-                    @if (session('status'))
-                        <div class="alert alert-success" role="alert">
-                            {{ session('status') }}
-                        </div>
-                    @endif
+    <link rel="stylesheet" href="{{ asset('Backend/assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('Backend/assets/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('Backend/assets/css/style.css') }}">
+</head>
 
-                    <form method="POST" action="{{ route('password.email') }}">
-                        @csrf
+<body>
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper full-page-wrapper">
+            <div class="row w-100 m-0">
+                <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
 
-                        <div class="row mb-3">
-                            <label for="email" class="col-md-4 col-form-label text-md-end">{{ __('Email Address') }}</label>
+                    <div class="card col-lg-4 mx-auto">
+                        <div class="card-body px-5 py-5">
 
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
+                            <h3 class="card-title mb-3">Forgot Password</h3>
 
-                                @error('email')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
+                            @if (session('status'))
+                                <div class="alert alert-success">{{ session('status') }}</div>
+                            @endif
 
-                        <div class="row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Send Password Reset Link') }}
+                            <form method="POST" action="{{ route('password.email') }}">
+                                @csrf
+
+                                <div class="form-group">
+                                    <label>Email *</label>
+                                    <input type="email" name="email"
+                                        class="form-control p_input @error('email') is-invalid @enderror"
+                                        value="{{ old('email') }}" required>
+                                    @error('email')
+                                        <span class="text-danger small">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    Send Password Reset Link
                                 </button>
-                            </div>
+
+                                <p class="text-center mt-3">
+                                    <a href="{{ route('login') }}">Back to Login</a>
+                                </p>
+
+                            </form>
+
                         </div>
-                    </form>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
+
+    <script src="{{ asset('Backend/assets/vendors/js/vendor.bundle.base.js') }}"></script>
+</body>
+
+</html>

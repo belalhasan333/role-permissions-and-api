@@ -34,10 +34,10 @@
                                         style="display: none;" onchange="previewAndUpload(this);">
                                 </form>
 
-
                                 {{-- DELETE --}}
                                 @if ($user->profile_image)
-                                    <form action="{{ route('profile.image.delete') }}" method="POST" class="d-inline">
+                                    <form id="deleteProfileImageForm" action="{{ route('profile.image.delete') }}"
+                                        method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
@@ -45,6 +45,10 @@
                                             <i class="bi bi-trash me-1"></i> Remove
                                         </button>
                                     </form>
+                                @else
+                                    <button class="btn btn-danger btn-sm rounded-pill px-4 py-2" disabled>
+                                        <i class="bi bi-trash me-1"></i> Remove
+                                    </button>
                                 @endif
                             </div>
                         </div>
@@ -84,7 +88,8 @@
                             <div class="tab-pane fade show active" id="overview">
                                 <h5 class="card-title mt-3">Profile Image</h5>
                                 <div class="text-center mb-4">
-                                    <img src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('Backend/assets/images/faces/face15.jpg') }}"
+                                    <img id="overviewProfileImg"
+                                        src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('Backend/assets/images/faces/face15.jpg') }}"
                                         alt="Profile" class="rounded-circle shadow" width="140" height="140"
                                         style="object-fit: cover;">
                                 </div>
@@ -175,18 +180,25 @@
 
 @section('scripts')
     <script>
+        // Improved: update profile image IMMEDIATELY after successful server response,
+        // and always reflect the uploaded image, not just the local file preview.
         function previewAndUpload(input) {
             const file = input.files[0];
             if (!file) return;
 
-            // Preview immediately
+            // Show preview while uploading, but final image will be set after success response.
             const reader = new FileReader();
             reader.onload = function(e) {
+                // Preview can be set for UI feedback during upload, but
+                // will be replaced by server URL as soon as upload is done.
                 document.getElementById('mainProfilePreview').src = e.target.result;
+                if (document.getElementById('overviewProfileImg')) {
+                    document.getElementById('overviewProfileImg').src = e.target.result;
+                }
             };
             reader.readAsDataURL(file);
 
-            // Upload via Ajax
+            // Ajax upload
             const formData = new FormData();
             formData.append('profile_image', file);
 
@@ -197,14 +209,41 @@
                     },
                     body: formData
                 })
-                .then(res => res.json())
+                .then(async res => {
+                    // If response is JSON, parse it, else force reload
+                    const contentType = res.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        window.location.reload(); // fallback: reload
+                        return;
+                    }
+                    return res.json();
+                })
                 .then(data => {
-                    if (data.success) {
-                        document.getElementById('mainProfilePreview').src = data.profile_image_url;
+                    if (!data) return;
+                    if (data.success && data.profile_image_url) {
+                        // Set image to final server file, in both places
+                        document.getElementById('mainProfilePreview').src = data.profile_image_url + '?t=' + Date.now();
+                        let overviewImg = document.getElementById('overviewProfileImg');
+                        if (overviewImg) {
+                            overviewImg.src = data.profile_image_url + '?t=' + Date.now();
+                        }
                         alert('Profile updated!');
+
+                        // Show delete button if previously missing
+                        let deleteForm = document.getElementById('deleteProfileImageForm');
+                        if (!deleteForm) {
+                            window.location.reload(); // reload so delete button appears
+                        }
+                    } else {
+                        alert(data.message || "Profile image could not be updated");
+                        window.location.reload();
                     }
                 })
-                .catch(err => console.error(err));
+                .catch(err => {
+                    console.error(err);
+                    alert('There was an error uploading your profile image.');
+                    window.location.reload();
+                });
         }
     </script>
 @endsection

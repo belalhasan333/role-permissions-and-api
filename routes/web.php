@@ -6,17 +6,20 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\WEB\RoleController;
 use App\Http\Controllers\WEB\UserController;
 use App\Http\Controllers\WEB\ProductController;
-use App\Http\Controllers\WEB\CategoryController;
 use App\Http\Controllers\WEB\ProfileController;
+use App\Http\Controllers\WEB\CategoryController;
+use App\Http\Controllers\WEB\DashboardController;
+use App\Http\Controllers\WEB\SocialAuthController;
 use App\Http\Controllers\WEB\NotificationController;
 
 Route::get('/', function () {
     return view('welcome');
 });
-
+Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect']);
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
 Auth::routes();
 
-Route::get('/home', [HomeController::class, 'index'])->name('dashboard');
+Route::get('/home', [DashboardController::class, 'index'])->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
 

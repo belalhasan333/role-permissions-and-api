@@ -133,9 +133,6 @@
     <script src="{{ asset('Backend/assets/js/misc.js') }}"></script>
     <script src="{{ asset('Backend/assets/js/settings.js') }}"></script>
     <script src="{{ asset('Backend/assets/js/todolist.js') }}"></script>
-    {{-- ckeditor --}}
-    {{-- <script src="https://cdn.ckeditor.com/ckeditor5/43.1.0/classic/ckeditor.js"></script> --}}
-    <!-- Page-specific push -->
     @stack('scripts')
 
 </body>

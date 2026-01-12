@@ -1,49 +1,62 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Confirm Password') }}</div>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Confirm Password</title>
 
-                <div class="card-body">
-                    {{ __('Please confirm your password before continuing.') }}
+    <link rel="stylesheet" href="{{ asset('Backend/assets/vendors/mdi/css/materialdesignicons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('Backend/assets/vendors/css/vendor.bundle.base.css') }}">
+    <link rel="stylesheet" href="{{ asset('Backend/assets/css/style.css') }}">
+</head>
 
-                    <form method="POST" action="{{ route('password.confirm') }}">
-                        @csrf
+<body>
+    <div class="container-scroller">
+        <div class="container-fluid page-body-wrapper full-page-wrapper">
+            <div class="row w-100 m-0">
+                <div class="content-wrapper full-page-wrapper d-flex align-items-center auth login-bg">
 
-                        <div class="row mb-3">
-                            <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>
+                    <div class="card col-lg-4 mx-auto">
+                        <div class="card-body px-5 py-5">
 
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control @error('password') is-invalid @enderror" name="password" required autocomplete="current-password">
+                            <h3 class="card-title mb-3">Confirm Password</h3>
 
-                                @error('password')
-                                    <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                                @enderror
-                            </div>
-                        </div>
+                            <p>Please confirm your password before continuing.</p>
 
-                        <div class="row mb-0">
-                            <div class="col-md-8 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Confirm Password') }}
+                            <form method="POST" action="{{ route('password.confirm') }}">
+                                @csrf
+
+                                <div class="form-group">
+                                    <label>Password *</label>
+                                    <input type="password" name="password"
+                                        class="form-control p_input @error('password') is-invalid @enderror" required>
+                                    @error('password')
+                                        <span class="text-danger small">{{ $message }}</span>
+                                    @enderror
+                                </div>
+
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    Confirm Password
                                 </button>
 
                                 @if (Route::has('password.request'))
-                                    <a class="btn btn-link" href="{{ route('password.request') }}">
-                                        {{ __('Forgot Your Password?') }}
-                                    </a>
+                                    <p class="text-center mt-3">
+                                        <a href="{{ route('password.request') }}">Forgot Your Password?</a>
+                                    </p>
                                 @endif
-                            </div>
+
+                            </form>
+
                         </div>
-                    </form>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
-</div>
-@endsection
+
+    <script src="{{ asset('Backend/assets/vendors/js/vendor.bundle.base.js') }}"></script>
+</body>
+
+</html>
