@@ -31,19 +31,19 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile/image/delete', [ProfileController::class, 'deleteImage'])->name('profile.image.delete');
 
     // Roles
-    Route::get('roles/data', [RoleController::class, 'data'])->name('roles.data');
+    Route::get('/roles/data', [RoleController::class, 'data'])->name('roles.data');
     Route::resource('roles', RoleController::class);
 
     // Users
-    Route::get('users/data', [UserController::class, 'getData'])->name('users.data');
+    Route::get('/users/data', [UserController::class, 'getData'])->name('users.data');
     Route::resource('users', UserController::class);
 
     // Products
-    Route::get('products/data', [ProductController::class, 'data'])->name('products.data');
+    Route::get('/products/data', [ProductController::class, 'data'])->name('products.data');
     Route::resource('products', ProductController::class);
 
     // Categories
-    Route::get('categories/data', [CategoryController::class, 'data'])->name('categories.data');
+    Route::get('/categories/data', [CategoryController::class, 'data'])->name('categories.data');
     Route::resource('categories', CategoryController::class);
 
     // Notifications

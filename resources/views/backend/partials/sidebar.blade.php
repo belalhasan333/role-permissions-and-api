@@ -74,15 +74,13 @@
                 </a>
             </li>
 
-            <!-- Users (Permission example: only show if can manage users) -->
-
+            <!-- Users (Web route) -->
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <span class="menu-icon"><i class="mdi mdi-account-multiple"></i></span>
                     <span class="menu-title">Manage Users</span>
                 </a>
             </li>
-
 
             <!-- Roles & Permissions -->
 
@@ -94,9 +92,7 @@
                 </a>
             </li>
 
-
-            <!-- Categories -->
-
+            <!-- Categories (Web route) -->
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
                     href="{{ route('categories.index') }}">
@@ -105,9 +101,7 @@
                 </a>
             </li>
 
-
-            <!-- Products -->
-
+            <!-- Products (Web route) -->
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
                     href="{{ route('products.index') }}">
@@ -116,17 +110,13 @@
                 </a>
             </li>
 
-
-            <!-- Orders -->
-
+            <!-- Orders (No route implemented yet) -->
             <li class="nav-item menu-items">
-                <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}"
-                    href="#">
+                <a class="nav-link {{ request()->routeIs('orders.*') ? 'active' : '' }}" href="#">
                     <span class="menu-icon"><i class="mdi mdi-cart"></i></span>
                     <span class="menu-title">Orders</span>
                 </a>
             </li>
-
 
             <!-- Profile -->
             <li class="nav-item menu-items">
@@ -153,8 +143,8 @@
                                 href="#">General Settings</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('smtp.*') ? 'active' : '' }}"
-                                href="#">SMTP Settings</a>
+                            <a class="nav-link {{ request()->routeIs('smtp.*') ? 'active' : '' }}" href="#">SMTP
+                                Settings</a>
                         </li>
                     </ul>
                 </div>
