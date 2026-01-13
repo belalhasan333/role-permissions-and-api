@@ -58,9 +58,9 @@
                         <div class="position-relative mb-4">
                             {{-- Profile Image --}}
                             <img id="mainProfilePreview"
-                                src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('Backend/assets/images/faces/face15.jpg') }}"
-                                alt="Profile" class="rounded-circle shadow" width="150" height="150"
-                                style="object-fit: cover;">
+                                 src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('backend/assets/images/faces/face15.jpg') }}"
+                                 alt="Profile" class="rounded-circle shadow" width="150" height="150"
+                                 style="object-fit: cover;">
 
                             {{-- Upload & Delete Buttons --}}
                             <div class="d-flex justify-content-center gap-3 mt-3">

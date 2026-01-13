@@ -21,8 +21,8 @@
                             <span class="count bg-success"></span>
                         </div>
                         <div class="profile-name">
-                            <h5 class="mb-0 font-weight-normal">{{ Auth::user()->name }}</h5>
-                            <span>{{ Auth::user()->role ?? 'Member' }}</span>
+                            <h5 class="mb-0 font-weight-normal text-white">{{ Auth::user()->name }}</h5>
+                            <span class="text-white">{{ Auth::user()->role ?? 'Member' }}</span>
                         </div>
                     </div>
 

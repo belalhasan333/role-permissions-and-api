@@ -32,7 +32,7 @@
         <div class="row mt-3">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <select name="category_id" class="form-control">    
+                    <select name="category_id" class="form-control">
                         <option value="">Select Category</option>
 
                         @foreach ($categories as $category)
@@ -90,11 +90,15 @@
             </div>
 
 
-            {{-- Product Image --}}
+            {{-- Product Images --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Product Image:</strong>
-                    <input type="file" name="image" class="form-control">
+                    <strong>Product Images:</strong>
+                    <input type="file" name="medias[]" class="form-control" multiple accept="image/*">
+                    <div class="form-text"><small>Accepts jpg, jpeg, png, webp up to 20MB each</small></div>
+                    @error('medias')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 

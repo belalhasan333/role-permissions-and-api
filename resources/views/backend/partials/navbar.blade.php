@@ -125,10 +125,10 @@
                         @endif
                     </a>
 
-                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list text-white"
+                    <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list "
                         aria-labelledby="notificationDropdown" style="width: 300px">
 
-                        <h6 class="p-3 mb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="p-3 mb-0 d-flex justify-content-between align-items-center text-white">
                             Notifications
 
                             @if ($unreadCount > 0)
@@ -165,13 +165,13 @@
                         <div class="navbar-profile">
                             <img class="img-xs rounded-circle"
                                 src="{{ asset('Backend/assets/images/faces/face15.jpg') }}" alt="">
-                            <p class="mb-0 d-none d-sm-block navbar-profile-name">Belal Hasan</p>
+                            <p class="mb-0 d-none d-sm-block navbar-profile-name text-white">Belal Hasan</p>
                             <i class="mdi mdi-menu-down d-none d-sm-block"></i>
                         </div>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list"
                         aria-labelledby="profileDropdown">
-                        <h6 class="p-3 mb-0">Profile</h6>
+                        <h6 class="p-3 mb-0 text-white">Profile</h6>
                         <div class="dropdown-divider"></div>
                         <a class="dropdown-item preview-item">
                             <div class="preview-thumbnail">

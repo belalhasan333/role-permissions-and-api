@@ -25,7 +25,7 @@ class NotificationController extends Controller
 
     public function read($id)
     {
-        $notification = auth()->user()
+        $notification = Auth::user()
             ->notifications()
             ->where('id', $id)
             ->firstOrFail();
@@ -37,7 +37,7 @@ class NotificationController extends Controller
 
     public function markAllRead()
     {
-        auth()->user()->unreadNotifications->markAsRead();
+        Auth::user()->unreadNotifications->markAsRead();
 
         return back();
     }

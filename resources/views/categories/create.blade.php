@@ -63,8 +63,13 @@
             {{-- Media --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Category Image:</strong>
-                    <input type="file" name="image" class="form-control">
+                    <label for="medias"><strong>Category Images:</strong></label>
+                    <input type="file" name="medias[]" id="medias"
+                        class="form-control @error('medias') is-invalid @enderror" multiple accept="image/*">
+                    <div class="form-text"><small>Accepts jpg, jpeg, png, webp up to 20MB each</small></div>
+                    @error('medias')
+                        <span class="text-danger small d-block">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
