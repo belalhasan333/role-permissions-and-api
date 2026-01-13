@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\WEB;
 
 use App\Models\User;
-use App\Models\Product;
 use App\Models\Category;
 use Illuminate\View\View;
 use Illuminate\Support\Str;
@@ -29,8 +28,9 @@ class CategoryController extends Controller
         $this->middleware('permission:category-edit', ['only' => ['edit', 'update']]);
         $this->middleware('permission:category-delete', ['only' => ['destroy']]);
     }
+
     /**
-     * Display a listing of the resource.
+     * Return datatable data for categories.
      *
      * @return \Illuminate\Http\Response
      */
@@ -47,7 +47,7 @@ class CategoryController extends Controller
                 if (!empty($category->medias) && is_array($category->medias)) {
                     $firstMedia = $category->medias[0] ?? null;
                     if ($firstMedia && isset($firstMedia['url'])) {
-                        return '<img src="' . $firstMedia['url'] . '" alt="media" style="max-width:80px; border-radius:4px;">';
+                        return '<img src="' . asset($firstMedia['url']) . '" alt="media" style="max-width:80px; border-radius:4px;">';
                     }
                 }
                 return '<span class="text-muted">No media</span>';
@@ -59,13 +59,16 @@ class CategoryController extends Controller
                             <i class="fa-solid fa-list"></i> Show
                          </a>';
 
-                if (auth()->user()->can('category-edit')) {
+                // Fix lint: use auth()->check() and auth()->user() defensively
+                $authUser = auth()->user();
+
+                if ($authUser && $authUser->can('category-edit')) {
                     $btn .= ' <a href="' . route('categories.edit', $category->id) . '" class="btn btn-primary btn-sm">
                                 <i class="fa-solid fa-pen-to-square"></i> Edit
                               </a>';
                 }
 
-                if (auth()->user()->can('category-delete')) {
+                if ($authUser && $authUser->can('category-delete')) {
                     $btn .= '<form action="' . route('categories.destroy', $category->id) . '" method="POST" style="display:inline;">
                                 ' . csrf_field() . '
                                 ' . method_field('DELETE') . '
@@ -81,10 +84,17 @@ class CategoryController extends Controller
             ->make(true);
     }
 
+    /**
+     * Show all categories view.
+     */
     public function index(): View
     {
         return view('categories.index');
     }
+
+    /**
+     * Show category creation form.
+     */
     public function create(): View
     {
         $categories = Category::all();
@@ -92,14 +102,11 @@ class CategoryController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
+     * Store a newly created category.
      */
     public function store(Request $request): RedirectResponse
     {
-        $user = User::role('subscriber')->get();
+        $users = User::role('subscriber')->get();
 
         $request->validate([
             'title'       => 'required|string|max:255',
@@ -107,20 +114,15 @@ class CategoryController extends Controller
             'medias'      => 'nullable|array',
             'medias.*'    => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
         ]);
+
         $medias = [];
 
         if ($request->hasFile('medias')) {
             foreach ($request->file('medias') as $file) {
-                if (!$file) {
-                    continue;
-                }
-                $mime = $file->getMimeType();
+                if (!$file) continue;
 
-                if (str_starts_with($mime, 'image')) {
-                    $type = 'image';
-                }
+                $type = str_starts_with($file->getMimeType(), 'image') ? 'image' : 'file';
                 $path = $file->store('categories', 'public');
-
                 $medias[] = [
                     'type' => $type,
                     'url'  => Storage::url($path),
@@ -133,47 +135,21 @@ class CategoryController extends Controller
             'title'       => $request->title,
             'description' => $request->description ?? '',
             'medias'      => $medias,
+            'status'      => 'active',
         ]);
-        Notification::send($user, new NotifyUser($category));
+
+        Notification::send($users, new NotifyUser($category));
 
         return redirect()->route('categories.index')
-            ->with('success', 'category created successfully.');
+            ->with('success', 'Category created successfully.');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
+     * Update a category.
      */
-    public function show(Category $category): View
+    public function update(Request $request, Category $category): RedirectResponse
     {
-        return view('categories.show', compact('category'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Category $category): View
-    {
-        return view('categories.edit', compact('category'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Category $categories): RedirectResponse
-    {
-
         $request->validate([
-
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'status'      => 'required|in:active,inactive',
@@ -181,20 +157,16 @@ class CategoryController extends Controller
             'medias.*'    => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
             'existing_medias' => 'nullable|array',
         ]);
-        $medias = [];
+
+        // Only keep existing medias, then append new uploads
+        $medias = $request->input('existing_medias', $category->medias ?? []);
 
         if ($request->hasFile('medias')) {
             foreach ($request->file('medias') as $file) {
-                if (!$file) {
-                    continue;
-                }
-                $mime = $file->getMimeType();
+                if (!$file) continue;
 
-                if (str_starts_with($mime, 'image')) {
-                    $type = 'image';
-                }
+                $type = str_starts_with($file->getMimeType(), 'image') ? 'image' : 'file';
                 $path = $file->store('categories', 'public');
-
                 $medias[] = [
                     'type' => $type,
                     'url'  => Storage::url($path),
@@ -203,29 +175,41 @@ class CategoryController extends Controller
             }
         }
 
-        $categories->update([
-
+        $category->update([
             'title'       => $request->title,
             'description' => $request->description ?? '',
             'status'      => $request->status,
-            'medias'      => empty($medias) ? $categories->medias : $medias,
+            'medias'      => $medias,
         ]);
 
         return redirect()->route('categories.index')
-            ->with('success', 'category updated successfully');
+            ->with('success', 'Category updated successfully.');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Product  $product
-     * @return \Illuminate\Http\Response
+     * Show a category.
+     */
+    public function show(Category $category): View
+    {
+        return view('categories.show', compact('category'));
+    }
+
+    /**
+     * Edit a category.
+     */
+    public function edit(Category $category): View
+    {
+        return view('categories.edit', compact('category'));
+    }
+
+    /**
+     * Remove the specified category from storage.
      */
     public function destroy(Category $category): RedirectResponse
     {
         $category->delete();
 
         return redirect()->route('categories.index')
-            ->with('success', 'category deleted successfully');
+            ->with('success', 'Category deleted successfully');
     }
 }

@@ -29,56 +29,106 @@
         @method('PUT')
 
         <div class="row">
+
+            {{-- Category --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Category:</strong>
-                    <select name="category_id" class="form-control text-black">
+                    <select name="category_id" class="form-control" required>
+                        <option value="">Select Category</option>
                         @foreach ($categories as $category)
                             <option value="{{ $category->id }}"
-                                {{ $category->id == $product->category_id ? 'selected' : '' }}>
-                                {{ $category->name }}
+                                {{ old('category_id', $product->category_id) == $category->id ? 'selected' : '' }}>
+                                {{ $category->title }}
                             </option>
                         @endforeach
                     </select>
+                    @error('category_id')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
+
+            {{-- Title --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Title:</strong>
                     <input type="text" name="title" value="{{ old('title', $product->title) }}" class="form-control"
-                        placeholder="Title">
+                        placeholder="Enter title" required>
+                    @error('title')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
-
+            {{-- Description --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Description:</strong>
-                    <textarea class="form-control" id="description" style="height:150px" name="description" placeholder="Description">{{ old('description', $product->description) }}</textarea>
+                    <textarea class="ckeditor form-control" id="description" style="height:150px" name="description"
+                        placeholder="Enter description">{{ old('description', $product->description) }}</textarea>
+                    @error('description')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
+            {{-- Price --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Price:</strong>
                     <input type="number" name="price" value="{{ old('price', $product->price) }}" class="form-control"
-                        placeholder="Price">
+                        placeholder="Enter price" required>
+                    @error('price')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
+            {{-- Status --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Status:</strong>
-                    <select name="status" class="form-control">
-                        <option value="active" {{ $product->status == 'active' ? 'selected' : '' }}>Active</option>
-                        <option value="inactive" {{ $product->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <select name="status" class="form-control" required>
+                        <option value="">-- Select Status --</option>
+                        <option value="active" {{ old('status', $product->status) == 'active' ? 'selected' : '' }}>Active
+                        </option>
+                        <option value="inactive" {{ old('status', $product->status) == 'inactive' ? 'selected' : '' }}>
+                            Inactive</option>
                     </select>
+                    @error('status')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Product Images --}}
+            <div class="col-xs-12 col-sm-12 col-md-12">
+                <div class="form-group">
+                    <strong>Product Images:</strong>
+                    <input type="file" name="medias[]" class="form-control" multiple>
+                    @if (is_array($product->medias))
+                        <div class="mt-2 mb-2">
+                            @foreach ($product->medias as $i => $media)
+                                <input type="hidden" name="existing_medias[{{ $i }}]"
+                                    value='{{ json_encode($media) }}'>
+                                @if (!empty($media['url']))
+                                    <img src="{{ str_starts_with($media['url'], ['/', 's']) ? asset($media['url']) : asset('storage/' . $media['url']) }}"
+                                        style="height:50px;width:70px;object-fit:cover;border-radius:6px;margin-right:4px;">
+                                @endif
+                            @endforeach
+                        </div>
+                    @endif
+                    @error('medias')
+                        <span class="text-danger">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
             <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                 <button type="submit" class="btn btn-primary btn-sm mb-2 mt-2"><i class="fa-solid fa-floppy-disk"></i>
-                    Submit</button>
+                    Submit
+                </button>
             </div>
         </div>
     </form>
@@ -86,7 +136,6 @@
 
 @push('scripts')
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
     <script>
         ClassicEditor
             .create(document.querySelector('#description'), {

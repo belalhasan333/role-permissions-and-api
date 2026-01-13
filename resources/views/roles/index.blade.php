@@ -14,12 +14,49 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    {{-- Toastr Notification Script --}}
+    @push('styles')
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    @endpush
+    {{-- Swift Toastr Notification Script --}}
+    @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <script>
+            $(function() {
+                @if (session('success'))
+                    toastr.success("{{ session('success') }}", 'Success', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('error'))
+                    toastr.error("{{ session('error') }}", 'Error', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('info'))
+                    toastr.info("{{ session('info') }}", 'Info', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('warning'))
+                    toastr.warning("{{ session('warning') }}", 'Warning', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+            });
+        </script>
+    @endpush
 
     <div class="card shadow-sm border-0">
         <div class="card-body p-0">

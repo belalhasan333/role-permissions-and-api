@@ -7,6 +7,48 @@
 
     <section class="section profile">
         <div class="row">
+            {{-- Toastr Notification Script --}}
+            @push('styles')
+                <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+            @endpush
+            @push('scripts')
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function() {
+                        @if (session('success'))
+                            toastr.success("{{ session('success') }}", 'Success', {
+                                closeButton: true,
+                                progressBar: true,
+                                timeOut: 3500
+                            });
+                        @endif
+
+                        @if (session('error'))
+                            toastr.error("{{ session('error') }}", 'Error', {
+                                closeButton: true,
+                                progressBar: true,
+                                timeOut: 3500
+                            });
+                        @endif
+
+                        @if (session('info'))
+                            toastr.info("{{ session('info') }}", 'Info', {
+                                closeButton: true,
+                                progressBar: true,
+                                timeOut: 3500
+                            });
+                        @endif
+
+                        @if (session('warning'))
+                            toastr.warning("{{ session('warning') }}", 'Warning', {
+                                closeButton: true,
+                                progressBar: true,
+                                timeOut: 3500
+                            });
+                        @endif
+                    });
+                </script>
+            @endpush
 
             {{-- LEFT COLUMN: PROFILE IMAGE --}}
             <div class="col-xl-4">
@@ -36,18 +78,9 @@
 
                                 {{-- DELETE --}}
                                 @if ($user->profile_image)
-                                    <form id="deleteProfileImageForm" action="{{ route('profile.image.delete') }}"
-                                        method="POST" class="d-inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
-                                            onclick="return confirm('Delete this photo?');">
+                                    <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
+                                            onclick="deleteProfileImage();">
                                             <i class="bi bi-trash me-1"></i> Remove
-                                        </button>
-                                    </form>
-                                @else
-                                    <button class="btn btn-danger btn-sm rounded-pill px-4 py-2" disabled>
-                                        <i class="bi bi-trash me-1"></i> Remove
                                     </button>
                                 @endif
                             </div>
@@ -180,21 +213,16 @@
 
 @section('scripts')
     <script>
-        // Improved: update profile image IMMEDIATELY after successful server response,
-        // and always reflect the uploaded image, not just the local file preview.
         function previewAndUpload(input) {
             const file = input.files[0];
             if (!file) return;
 
-            // Show preview while uploading, but final image will be set after success response.
+            // Preview
             const reader = new FileReader();
             reader.onload = function(e) {
-                // Preview can be set for UI feedback during upload, but
-                // will be replaced by server URL as soon as upload is done.
                 document.getElementById('mainProfilePreview').src = e.target.result;
-                if (document.getElementById('overviewProfileImg')) {
-                    document.getElementById('overviewProfileImg').src = e.target.result;
-                }
+                let overviewImg = document.getElementById('overviewProfileImg');
+                if (overviewImg) overviewImg.src = e.target.result;
             };
             reader.readAsDataURL(file);
 
@@ -205,44 +233,54 @@
             fetch("{{ route('profile.image.update') }}", {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                     },
                     body: formData
                 })
-                .then(async res => {
-                    // If response is JSON, parse it, else force reload
-                    const contentType = res.headers.get("content-type");
-                    if (!contentType || !contentType.includes("application/json")) {
-                        window.location.reload(); // fallback: reload
-                        return;
-                    }
-                    return res.json();
-                })
+                .then(res => res.json())
                 .then(data => {
-                    if (!data) return;
                     if (data.success && data.profile_image_url) {
-                        // Set image to final server file, in both places
                         document.getElementById('mainProfilePreview').src = data.profile_image_url + '?t=' + Date.now();
                         let overviewImg = document.getElementById('overviewProfileImg');
-                        if (overviewImg) {
-                            overviewImg.src = data.profile_image_url + '?t=' + Date.now();
-                        }
-                        alert('Profile updated!');
-
-                        // Show delete button if previously missing
-                        let deleteForm = document.getElementById('deleteProfileImageForm');
-                        if (!deleteForm) {
-                            window.location.reload(); // reload so delete button appears
-                        }
+                        if (overviewImg) overviewImg.src = data.profile_image_url + '?t=' + Date.now();
+                        toastr.success('Profile image updated!', 'Success');
                     } else {
-                        alert(data.message || "Profile image could not be updated");
-                        window.location.reload();
+                        toastr.error('Could not update image.', 'Error');
                     }
                 })
                 .catch(err => {
                     console.error(err);
-                    alert('There was an error uploading your profile image.');
-                    window.location.reload();
+                    toastr.error('Error uploading image.', 'Error');
+                });
+        }
+
+        function deleteProfileImage() {
+            if (!confirm('Delete this photo?')) return;
+
+            fetch("{{ route('profile.image.delete') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-HTTP-Method-Override': 'DELETE',
+                        'Accept': 'application/json'
+                    },
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('mainProfilePreview').src =
+                            "{{ asset('Backend/assets/images/faces/face15.jpg') }}";
+                        let overviewImg = document.getElementById('overviewProfileImg');
+                        if (overviewImg) overviewImg.src = "{{ asset('Backend/assets/images/faces/face15.jpg') }}";
+                        toastr.success('Profile image deleted!', 'Success');
+                    } else {
+                        toastr.error('Could not delete image.', 'Error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    toastr.error('Could not delete image.', 'Error');
                 });
         }
     </script>

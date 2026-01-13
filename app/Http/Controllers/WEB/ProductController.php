@@ -11,7 +11,6 @@ use Illuminate\Http\Request;
 use App\Notifications\NotifyUser;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Storage;
 use Yajra\DataTables\Facades\DataTables;
@@ -27,6 +26,7 @@ class ProductController extends Controller
         $this->middleware('permission:product-delete', ['only' => ['destroy']]);
     }
 
+    // DataTables AJAX
     public function data()
     {
         $products = Product::with('category')->latest();
@@ -43,33 +43,30 @@ class ProductController extends Controller
                 return number_format($product->price, 2);
             })
             ->addColumn('status', function ($product) {
-                $badge = $product->status === 'active'
-                    ? 'bg-success'
-                    : 'bg-danger';
+                $badge = $product->status === 'active' ? 'bg-success' : 'bg-danger';
                 return '<span class="badge ' . $badge . '">' . ucfirst($product->status) . '</span>';
             })
             ->addColumn('media', function ($product) {
                 if (!empty($product->medias) && is_array($product->medias)) {
                     $first = $product->medias[0] ?? null;
-                    if ($first && isset($first['url'])) {
-                        return '<img src="' . $first['url'] . '" alt="product" style="max-width:90px; border-radius:6px; object-fit:cover;">';
+                    if ($first && !empty($first['url'])) {
+                        $url = str_starts_with($first['url'], '/storage')
+                            ? asset($first['url'])
+                            : asset('storage/' . $first['url']);
+                        return '<img src="' . $url . '" style="height:50px;width:70px;object-fit:cover;border-radius:6px">';
                     }
                 }
                 return '<span class="text-muted">No image</span>';
             })
             ->addColumn('action', function ($product) {
-                $btn = '';
-
-                $btn .= '<a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-1">
+                $btn = '<a href="' . route('products.show', $product->id) . '" class="btn btn-info btn-sm me-1">
                             <i class="fa-solid fa-list"></i> Show
-                         </a>';
-
+                        </a>';
                 if (auth()->user()->can('product-edit')) {
                     $btn .= '<a href="' . route('products.edit', $product->id) . '" class="btn btn-primary btn-sm me-1">
                                 <i class="fa-solid fa-pen-to-square"></i> Edit
-                              </a>';
+                             </a>';
                 }
-
                 if (auth()->user()->can('product-delete')) {
                     $btn .= '<form action="' . route('products.destroy', $product->id) . '" method="POST" style="display:inline;">
                                 ' . csrf_field() . method_field('DELETE') . '
@@ -78,7 +75,6 @@ class ProductController extends Controller
                                 </button>
                              </form>';
                 }
-
                 return $btn;
             })
             ->rawColumns(['media', 'action', 'status', 'category_name', 'description'])
@@ -89,6 +85,7 @@ class ProductController extends Controller
     {
         return view('products.index');
     }
+
     public function create(): View
     {
         $categories = Category::where('status', 'active')->get();
@@ -112,7 +109,6 @@ class ProductController extends Controller
         $medias = [];
         if ($request->hasFile('medias')) {
             foreach ($request->file('medias') as $file) {
-                if (!$file) continue;
                 $medias[] = [
                     'type' => str_starts_with($file->getMimeType(), 'image') ? 'image' : 'file',
                     'url'  => Storage::url($file->store('products', 'public')),
@@ -129,10 +125,9 @@ class ProductController extends Controller
             'status'      => $request->status,
             'medias'      => $medias,
         ]);
-        //         $response = Http::post(route('api.notify-subscribers'), [
-        //     'product_id' => $product->id,
-        // ]);
-        Notification::send($user, new NotifyUser($product));
+
+        Notification::send($user, new \App\Notifications\NotifyUser($product));
+
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
 
@@ -151,6 +146,7 @@ class ProductController extends Controller
     public function update(Request $request, Product $product): RedirectResponse
     {
         $user = User::role('subscriber')->get();
+
         $request->validate([
             'category_id' => 'required|exists:categories,id',
             'title'       => 'required|string|max:255',
@@ -162,11 +158,12 @@ class ProductController extends Controller
             'existing_medias' => 'nullable|array',
         ]);
 
-        $medias = $product->medias ?? [];
+        // Start with existing medias
+        $medias = $request->existing_medias ?? $product->medias ?? [];
+
+        // Add new uploads if any
         if ($request->hasFile('medias')) {
-            $medias = [];
             foreach ($request->file('medias') as $file) {
-                if (!$file) continue;
                 $medias[] = [
                     'type' => str_starts_with($file->getMimeType(), 'image') ? 'image' : 'file',
                     'url'  => Storage::url($file->store('products', 'public')),
@@ -183,7 +180,8 @@ class ProductController extends Controller
             'status'      => $request->status,
             'medias'      => $medias,
         ]);
-        Notification::send($user, new NotifyUser($product));
+
+        Notification::send($user, new \App\Notifications\NotifyUser($product));
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }

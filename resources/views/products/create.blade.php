@@ -32,7 +32,7 @@
         <div class="row mt-3">
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <select name="category_id" class="form-control">
+                    <select name="category_id" class="form-control">    
                         <option value="">Select Category</option>
 
                         @foreach ($categories as $category)

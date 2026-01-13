@@ -9,7 +9,18 @@
         <p><strong>Status:</strong> {{ ucfirst($category->status) }}</p>
 
 
-        <p><strong>Media:</strong> {{ json_encode($category->medias) }}</p>
+        <div class="col-md-12 mb-3">
+            <div class="form-group">
+                <strong>Category Image:</strong><br>
+
+                @if (!empty($category->medias) && is_array($category->medias) && isset($category->medias[0]['url']))
+                    <img src="{{ $category->medias[0]['url'] }}" alt="Category Image" width="150" class="img-thumbnail mb-2">
+                @else
+                    <span class="text-muted">No image available.</span>
+                @endif
+            </div>
+        </div>
+
 
 
 

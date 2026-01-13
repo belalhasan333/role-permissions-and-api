@@ -22,7 +22,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone' => 'nullable|string|max:255',
@@ -31,14 +31,14 @@ class ProfileController extends Controller
             'country' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'about' => 'nullable|string',
-            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Handle profile image
         if ($request->hasFile('profile_image')) {
             // Delete old image if exists
-            if ($user->profile_image && Storage::exists('public/profile/' . $user->profile_image)) {
-                Storage::delete('public/profile/' . $user->profile_image);
+            if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
+                Storage::disk('public')->delete('profile/' . $user->profile_image);
             }
 
             $image = $request->file('profile_image');
@@ -47,32 +47,35 @@ class ProfileController extends Controller
             $user->profile_image = $imageName;
         }
 
-        // Update
-        $user->update($request->only([
-            'name',
-            'email',
-            'phone',
-            'company',
-            'job',
-            'country',
-            'address',
-            'about',
-        ]));
+        // Update other fields
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->phone = $validated['phone'] ?? null;
+        $user->company = $validated['company'] ?? null;
+        $user->job = $validated['job'] ?? null;
+        $user->country = $validated['country'] ?? null;
+        $user->address = $validated['address'] ?? null;
+        $user->about = $validated['about'] ?? null;
+        $user->save();
 
         return redirect()->route('profile.index')->with('success', 'Profile updated successfully');
     }
 
     // Delete profile image
-    public function deleteImage()
+    public function deleteImage(Request $request)
     {
         $user = Auth::user();
 
-        if ($user->profile_image && Storage::exists('public/profile/' . $user->profile_image)) {
-            Storage::delete('public/profile/' . $user->profile_image);
+        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
+            Storage::disk('public')->delete('profile/' . $user->profile_image);
         }
 
         $user->profile_image = null;
         $user->save();
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true]);
+        }
 
         return redirect()->route('profile.index')->with('success', 'Profile image deleted successfully');
     }
@@ -106,8 +109,8 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         // Delete old image if exists
-        if ($user->profile_image && Storage::exists('public/profile/' . $user->profile_image)) {
-            Storage::delete('public/profile/' . $user->profile_image);
+        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
+            Storage::disk('public')->delete('profile/' . $user->profile_image);
         }
 
         // Save new image

@@ -13,6 +13,7 @@
         </div>
     </div>
 
+    {{-- Error Alert --}}
     @if ($errors->any())
         <div class="alert alert-danger">
             <strong>Whoops!</strong> There were some problems with your input.<br><br>
@@ -32,24 +33,33 @@
             {{-- Title --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Title:</strong>
-                    <input type="text" name="title" value="{{ old('title', $category->title) }}" class="form-control"
-                        placeholder="Enter title">
+                    <label for="title"><strong>Title:</strong></label>
+                    <input type="text" name="title" id="title" value="{{ old('title', $category->title) }}"
+                        class="form-control @error('title') is-invalid @enderror" placeholder="Enter title" required>
+                    @error('title')
+                        <span class="text-danger small">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
             {{-- Description --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Description:</strong>
-                    <textarea class="form-control" id="description" style="height:150px" name="description" placeholder="Enter description">{{ old('description', $category->description) }}</textarea>
+                    <label for="description"><strong>Description:</strong></label>
+                    <textarea class="form-control @error('description') is-invalid @enderror" id="description" style="height:150px"
+                        name="description" placeholder="Enter description">{{ old('description', $category->description) }}</textarea>
+                    @error('description')
+                        <span class="text-danger small">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
             {{-- Status --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <select name="status" class="form-control">
+                    <label for="status"><strong>Status:</strong></label>
+                    <select name="status" id="status" class="form-control @error('status') is-invalid @enderror"
+                        required>
                         <option value="">-- Select Status --</option>
                         <option value="active" {{ old('status', $category->status) == 'active' ? 'selected' : '' }}>
                             Active
@@ -58,20 +68,38 @@
                             Inactive
                         </option>
                     </select>
+                    @error('status')
+                        <span class="text-danger small">{{ $message }}</span>
+                    @enderror
                 </div>
             </div>
 
             {{-- Media --}}
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
-                    <strong>Category Image:</strong>
-                    <input type="file" name="image" class="form-control">
+                    <label for="medias"><strong>Category Images:</strong></label>
+                    <input type="file" name="medias[]" id="medias"
+                        class="form-control @error('medias') is-invalid @enderror" multiple accept="image/*">
+                    @error('medias')
+                        <span class="text-danger small d-block">{{ $message }}</span>
+                    @enderror
+                    @if (isset($category->medias) && is_array($category->medias) && count($category->medias))
+                        <div class="mt-2">
+                            @foreach ($category->medias as $i => $media)
+                                <input type="hidden" name="existing_medias[]" value="{{ json_encode($media) }}">
+                                <img src="{{ asset($media['url']) }}" alt="Category Media {{ $i }}"
+                                    style="height:50px;width:70px;object-fit:cover;border-radius:4px;margin-right:4px;">
+                            @endforeach
+                        </div>
+                    @endif
+                    <div class="form-text"><small>Accepts jpg, jpeg, png, webp up to 20MB each</small></div>
                 </div>
             </div>
 
             <div class="col-xs-12 col-sm-12 col-md-12 text-center">
-                <button type="submit" class="btn btn-primary btn-sm mb-2 mt-2"><i class="fa-solid fa-floppy-disk"></i>
-                    Submit</button>
+                <button type="submit" class="btn btn-primary btn-sm mb-2 mt-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Submit
+                </button>
             </div>
         </div>
     </form>
@@ -81,22 +109,23 @@
 
 @push('scripts')
     <script src="https://cdn.ckeditor.com/ckeditor5/39.0.1/classic/ckeditor.js"></script>
-
     <script>
-        ClassicEditor
-            .create(document.querySelector('#description'), {
-                toolbar: {
-                    items: [
-                        'heading', '|',
-                        'bold', 'italic', 'link', 'bulletedList', 'numberedList',
-                        '|', 'outdent', 'indent', '|', 'undo', 'redo'
-                    ]
-                },
-                language: 'en',
-                height: 350
-            })
-            .catch(error => {
-                console.error('CKEditor error:', error);
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            ClassicEditor
+                .create(document.querySelector('#description'), {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', 'bulletedList', 'numberedList',
+                            '|', 'outdent', 'indent', '|', 'undo', 'redo'
+                        ]
+                    },
+                    language: 'en',
+                    height: 350
+                })
+                .catch(error => {
+                    console.error('CKEditor error:', error);
+                });
+        });
     </script>
 @endpush

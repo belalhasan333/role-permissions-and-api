@@ -87,7 +87,6 @@
         }
     </style>
 
-
     @stack('styles')
 </head>
 
@@ -106,7 +105,6 @@
             </div>
         </div>
     </div>
-
     <!-- Vendor bundle (jQuery, Bootstrap) -->
     <script src="{{ asset('Backend/assets/vendors/js/vendor.bundle.base.js') }}"></script>
 

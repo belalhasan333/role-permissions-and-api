@@ -10,6 +10,49 @@
         </div>
     </div>
 
+    {{-- Swift Toastr Notification Script --}}
+    @push('styles')
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    @endpush
+    @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <script>
+            $(function() {
+                @if (session('success'))
+                    toastr.success("{{ session('success') }}", 'Success', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('error'))
+                    toastr.error("{{ session('error') }}", 'Error', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('info'))
+                    toastr.info("{{ session('info') }}", 'Info', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('warning'))
+                    toastr.warning("{{ session('warning') }}", 'Warning', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+            });
+        </script>
+    @endpush
+
     <table class="table table-bordered" id="users-table">
         <thead>
             <tr>

@@ -14,16 +14,52 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+    {{-- Toastr Notification Script --}}
+    @push('styles')
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
+    @endpush
+    @push('scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+        <script>
+            $(function() {
+                @if (session('success'))
+                    toastr.success("{{ session('success') }}", 'Success', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('error'))
+                    toastr.error("{{ session('error') }}", 'Error', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('info'))
+                    toastr.info("{{ session('info') }}", 'Info', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+
+                @if (session('warning'))
+                    toastr.warning("{{ session('warning') }}", 'Warning', {
+                        closeButton: true,
+                        progressBar: true,
+                        timeOut: 3500
+                    });
+                @endif
+            });
+        </script>
+    @endpush
 
     <div class="card shadow-sm">
         <div class="card-body">
-            <table id="products-table" class="table table-bordered table-hover" style="width:100%">
+            <table id="products-table" class="table table-bordered table-hover w-100">
                 <thead class="table-light">
                     <tr>
                         <th width="5%">No</th>
@@ -46,50 +82,44 @@
 
 @push('scripts')
     <script>
-        $(document).ready(function() {
+        $(function() {
             $('#products-table').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: "{{ route('products.data') }}",
                 columns: [{
                         data: 'DT_RowIndex',
-                        name: 'DT_RowIndex',
                         orderable: false,
-                        searchable: false,
-                        className: "text-center fw-bold"
+                        searchable: false
                     },
                     {
-                        data: 'title',
-                        name: 'title'
+                        data: 'title'
                     },
                     {
-                        data: 'description',
-                        name: 'description'
+                        data: 'description'
                     },
                     {
-                        data: 'category_name',
-                        name: 'category.title'
+                        data: 'category_name'
                     },
                     {
                         data: 'price',
-                        name: 'price',
-                        className: "text-end"
+                        className: 'text-end'
                     },
                     {
                         data: 'status',
-                        name: 'status',
-                        className: "text-center"
+                        className: 'text-center'
                     },
                     {
                         data: 'media',
-                        name: 'media',
                         orderable: false,
                         searchable: false,
-                        className: "text-center"
+                        className: 'text-center',
+                        render: function(data, type, row) {
+                            return data ? data : '<span class="text-muted">No image</span>';
+                        }
                     },
                     {
                         data: 'action',
-                        name: 'action',
                         orderable: false,
                         searchable: false
                     }
@@ -97,9 +127,10 @@
                 order: [
                     [0, 'desc']
                 ],
-                pageLength: 10,
-                language: {
-                    processing: "<div class='text-center py-4'><i class='fa fa-spinner fa-spin fa-3x text-primary'></i><br>Loading products...</div>"
+                createdRow: function(row, data, dataIndex) {
+                    // Make sure that media and action columns display raw HTML
+                    $('td', row).eq(6).html(data.media);
+                    $('td', row).eq(7).html(data.action);
                 }
             });
         });
