@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    /**
+     * Show user profile
+     */
     public function index()
     {
         return view('profile.index', [
@@ -17,14 +20,16 @@ class ProfileController extends Controller
         ]);
     }
 
-    // Update profile details
+    /**
+     * Update user profile
+     */
     public function update(Request $request)
     {
         $user = Auth::user();
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email',
+            'email' => 'required|email|unique:users,email,' . $user->id, // avoid duplicate emails
             'phone' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'job' => 'nullable|string|max:255',
@@ -34,12 +39,9 @@ class ProfileController extends Controller
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle profile image
+        // Handle profile image if uploaded
         if ($request->hasFile('profile_image')) {
-            // Delete old image if exists
-            if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
-                Storage::disk('public')->delete('profile/' . $user->profile_image);
-            }
+            $this->deleteOldImage($user);
 
             $image = $request->file('profile_image');
             $imageName = time() . '_' . $image->getClientOriginalName();
@@ -48,27 +50,27 @@ class ProfileController extends Controller
         }
 
         // Update other fields
-        $user->name = $validated['name'];
-        $user->email = $validated['email'];
-        $user->phone = $validated['phone'] ?? null;
-        $user->company = $validated['company'] ?? null;
-        $user->job = $validated['job'] ?? null;
-        $user->country = $validated['country'] ?? null;
-        $user->address = $validated['address'] ?? null;
-        $user->about = $validated['about'] ?? null;
-        $user->save();
+        $user->fill([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'company' => $validated['company'] ?? null,
+            'job' => $validated['job'] ?? null,
+            'country' => $validated['country'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'about' => $validated['about'] ?? null,
+        ])->save();
 
         return redirect()->route('profile.index')->with('success', 'Profile updated successfully');
     }
 
-    // Delete profile image
+    /**
+     * Delete profile image
+     */
     public function deleteImage(Request $request)
     {
         $user = Auth::user();
-
-        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
-            Storage::disk('public')->delete('profile/' . $user->profile_image);
-        }
+        $this->deleteOldImage($user);
 
         $user->profile_image = null;
         $user->save();
@@ -80,7 +82,9 @@ class ProfileController extends Controller
         return redirect()->route('profile.index')->with('success', 'Profile image deleted successfully');
     }
 
-    // Change password
+    /**
+     * Change user password
+     */
     public function password(Request $request)
     {
         $request->validate([
@@ -91,7 +95,7 @@ class ProfileController extends Controller
         $user = Auth::user();
 
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Wrong password']);
+            return back()->withErrors(['current_password' => 'Current password is incorrect']);
         }
 
         $user->password = Hash::make($request->password);
@@ -100,6 +104,9 @@ class ProfileController extends Controller
         return redirect()->route('profile.index')->with('success', 'Password changed successfully');
     }
 
+    /**
+     * Update profile image via Ajax
+     */
     public function updateImage(Request $request)
     {
         $request->validate([
@@ -107,13 +114,8 @@ class ProfileController extends Controller
         ]);
 
         $user = Auth::user();
+        $this->deleteOldImage($user);
 
-        // Delete old image if exists
-        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
-            Storage::disk('public')->delete('profile/' . $user->profile_image);
-        }
-
-        // Save new image
         $image = $request->file('profile_image');
         $imageName = time() . '_' . $image->getClientOriginalName();
         $image->storeAs('public/profile', $imageName);
@@ -121,10 +123,19 @@ class ProfileController extends Controller
         $user->profile_image = $imageName;
         $user->save();
 
-        // Return JSON for Ajax
         return response()->json([
             'success' => true,
             'profile_image_url' => asset('storage/profile/' . $imageName)
         ]);
+    }
+
+    /**
+     * Helper function to delete old profile image
+     */
+    private function deleteOldImage($user)
+    {
+        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
+            Storage::disk('public')->delete('profile/' . $user->profile_image);
+        }
     }
 }

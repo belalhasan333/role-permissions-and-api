@@ -1,5 +1,9 @@
 @extends('master')
 
+@push('styles')
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+@endpush
+
 @section('content')
     <div class="pagetitle">
         <h1>Profile</h1>
@@ -7,48 +11,6 @@
 
     <section class="section profile">
         <div class="row">
-            {{-- Toastr Notification Script --}}
-            @push('styles')
-                <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet" />
-            @endpush
-            @push('scripts')
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-                <script>
-                    document.addEventListener("DOMContentLoaded", function() {
-                        @if (session('success'))
-                            toastr.success("{{ session('success') }}", 'Success', {
-                                closeButton: true,
-                                progressBar: true,
-                                timeOut: 3500
-                            });
-                        @endif
-
-                        @if (session('error'))
-                            toastr.error("{{ session('error') }}", 'Error', {
-                                closeButton: true,
-                                progressBar: true,
-                                timeOut: 3500
-                            });
-                        @endif
-
-                        @if (session('info'))
-                            toastr.info("{{ session('info') }}", 'Info', {
-                                closeButton: true,
-                                progressBar: true,
-                                timeOut: 3500
-                            });
-                        @endif
-
-                        @if (session('warning'))
-                            toastr.warning("{{ session('warning') }}", 'Warning', {
-                                closeButton: true,
-                                progressBar: true,
-                                timeOut: 3500
-                            });
-                        @endif
-                    });
-                </script>
-            @endpush
 
             {{-- LEFT COLUMN: PROFILE IMAGE --}}
             <div class="col-xl-4">
@@ -57,10 +19,18 @@
 
                         <div class="position-relative mb-4">
                             {{-- Profile Image --}}
-                            <img id="mainProfilePreview"
-                                 src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('backend/assets/images/faces/face15.jpg') }}"
-                                 alt="Profile" class="rounded-circle shadow" width="150" height="150"
-                                 style="object-fit: cover;">
+                            @php
+                                use Illuminate\Support\Facades\Storage;
+
+                                // Always check for the actual user's image and show it if available, otherwise fallback
+$profileImgSrc =
+    $user->profile_image &&
+    Storage::disk('public')->exists('profile/' . $user->profile_image)
+        ? asset('storage/profile/' . $user->profile_image)
+        : asset('backend/assets/images/faces/face15.jpg');
+                            @endphp
+                            <img id="mainProfilePreview" src="{{ $profileImgSrc }}" alt="Profile"
+                                class="rounded-circle shadow" width="150" height="150" style="object-fit: cover;">
 
                             {{-- Upload & Delete Buttons --}}
                             <div class="d-flex justify-content-center gap-3 mt-3">
@@ -77,10 +47,10 @@
                                 </form>
 
                                 {{-- DELETE --}}
-                                @if ($user->profile_image)
+                                @if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image))
                                     <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
-                                            onclick="deleteProfileImage();">
-                                            <i class="bi bi-trash me-1"></i> Remove
+                                        onclick="deleteProfileImage();">
+                                        <i class="bi bi-trash me-1"></i> Remove
                                     </button>
                                 @endif
                             </div>
@@ -121,9 +91,9 @@
                             <div class="tab-pane fade show active" id="overview">
                                 <h5 class="card-title mt-3">Profile Image</h5>
                                 <div class="text-center mb-4">
-                                    <img id="overviewProfileImg"
-                                        src="{{ $user->profile_image ? asset('storage/profile/' . $user->profile_image) : asset('Backend/assets/images/faces/face15.jpg') }}"
-                                        alt="Profile" class="rounded-circle shadow" width="140" height="140"
+                                    {{-- Display uploaded image or fallback --}}
+                                    <img id="overviewProfileImg" src="{{ $profileImgSrc }}" alt="Profile"
+                                        class="rounded-circle shadow" width="140" height="140"
                                         style="object-fit: cover;">
                                 </div>
 
@@ -166,23 +136,29 @@
                             <div class="tab-pane fade" id="edit">
                                 <form method="POST" action="{{ route('profile.update') }}">
                                     @csrf
-                                    <div class="mb-3"><label>Name</label><input type="text" class="form-control"
-                                            name="name" value="{{ $user->name }}"></div>
-                                    <div class="mb-3"><label>Email</label><input type="email" class="form-control"
-                                            name="email" value="{{ $user->email }}"></div>
-                                    <div class="mb-3"><label>Phone</label><input type="text" class="form-control"
-                                            name="phone" value="{{ $user->phone }}"></div>
-                                    <div class="mb-3"><label>Company</label><input type="text" class="form-control"
-                                            name="company" value="{{ $user->company }}"></div>
-                                    <div class="mb-3"><label>Job</label><input type="text" class="form-control"
-                                            name="job" value="{{ $user->job }}"></div>
-                                    <div class="mb-3"><label>Country</label><input type="text" class="form-control"
-                                            name="country" value="{{ $user->country }}"></div>
-                                    <div class="mb-3"><label>Address</label>
-                                        <textarea class="form-control" name="address">{{ $user->address }}</textarea>
+                                    <div class="mb-3"><label for="name">Name</label><input type="text"
+                                            class="form-control" id="name" name="name"
+                                            value="{{ old('name', $user->name) }}"></div>
+                                    <div class="mb-3"><label for="email">Email</label><input type="email"
+                                            class="form-control" id="email" name="email"
+                                            value="{{ old('email', $user->email) }}"></div>
+                                    <div class="mb-3"><label for="phone">Phone</label><input type="text"
+                                            class="form-control" id="phone" name="phone"
+                                            value="{{ old('phone', $user->phone) }}"></div>
+                                    <div class="mb-3"><label for="company">Company</label><input type="text"
+                                            class="form-control" id="company" name="company"
+                                            value="{{ old('company', $user->company) }}"></div>
+                                    <div class="mb-3"><label for="job">Job</label><input type="text"
+                                            class="form-control" id="job" name="job"
+                                            value="{{ old('job', $user->job) }}"></div>
+                                    <div class="mb-3"><label for="country">Country</label><input type="text"
+                                            class="form-control" id="country" name="country"
+                                            value="{{ old('country', $user->country) }}"></div>
+                                    <div class="mb-3"><label for="address">Address</label>
+                                        <textarea class="form-control" id="address" name="address">{{ old('address', $user->address) }}</textarea>
                                     </div>
-                                    <div class="mb-3"><label>About</label>
-                                        <textarea class="form-control" name="about">{{ $user->about }}</textarea>
+                                    <div class="mb-3"><label for="about">About</label>
+                                        <textarea class="form-control" id="about" name="about">{{ old('about', $user->about) }}</textarea>
                                     </div>
                                     <button class="btn btn-primary">Save Changes</button>
                                 </form>
@@ -192,11 +168,13 @@
                             <div class="tab-pane fade" id="password">
                                 <form method="POST" action="{{ route('profile.password') }}">
                                     @csrf
-                                    <div class="mb-3"><label>Current Password</label><input type="password"
-                                            name="current_password" class="form-control"></div>
-                                    <div class="mb-3"><label>New Password</label><input type="password" name="password"
+                                    <div class="mb-3"><label for="current_password">Current Password</label><input
+                                            type="password" id="current_password" name="current_password"
                                             class="form-control"></div>
-                                    <div class="mb-3"><label>Confirm New Password</label><input type="password"
+                                    <div class="mb-3"><label for="password">New Password</label><input type="password"
+                                            id="password" name="password" class="form-control"></div>
+                                    <div class="mb-3"><label for="password_confirmation">Confirm New
+                                            Password</label><input type="password" id="password_confirmation"
                                             name="password_confirmation" class="form-control"></div>
                                     <button class="btn btn-warning">Change Password</button>
                                 </form>
@@ -211,22 +189,40 @@
     </section>
 @endsection
 
-@section('scripts')
+@push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
     <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            @if (session('success'))
+                toastr.success("{{ session('success') }}", 'Success', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 3500
+                });
+            @endif
+            @if (session('error'))
+                toastr.error("{{ session('error') }}", 'Error', {
+                    closeButton: true,
+                    progressBar: true,
+                    timeOut: 3500
+                });
+            @endif
+        });
+
         function previewAndUpload(input) {
             const file = input.files[0];
             if (!file) return;
 
-            // Preview
+            // Preview image for instant user feedback
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = e => {
                 document.getElementById('mainProfilePreview').src = e.target.result;
-                let overviewImg = document.getElementById('overviewProfileImg');
+                const overviewImg = document.getElementById('overviewProfileImg');
                 if (overviewImg) overviewImg.src = e.target.result;
             };
             reader.readAsDataURL(file);
 
-            // Ajax upload
+            // Upload via AJAX and update image with new URL so always shows the latest uploaded file
             const formData = new FormData();
             formData.append('profile_image', file);
 
@@ -238,21 +234,20 @@
                     },
                     body: formData
                 })
-                .then(res => res.json())
+                .then(resp => resp.json())
                 .then(data => {
                     if (data.success && data.profile_image_url) {
-                        document.getElementById('mainProfilePreview').src = data.profile_image_url + '?t=' + Date.now();
-                        let overviewImg = document.getElementById('overviewProfileImg');
-                        if (overviewImg) overviewImg.src = data.profile_image_url + '?t=' + Date.now();
+                        // When the upload is successful, set the new URL with a timestamp to prevent cache
+                        let newImgUrl = data.profile_image_url + '?t=' + Date.now();
+                        document.getElementById('mainProfilePreview').src = newImgUrl;
+                        const overviewImg = document.getElementById('overviewProfileImg');
+                        if (overviewImg) overviewImg.src = newImgUrl;
                         toastr.success('Profile image updated!', 'Success');
                     } else {
                         toastr.error('Could not update image.', 'Error');
                     }
                 })
-                .catch(err => {
-                    console.error(err);
-                    toastr.error('Error uploading image.', 'Error');
-                });
+                .catch(() => toastr.error('Error uploading image.', 'Error'));
         }
 
         function deleteProfileImage() {
@@ -264,24 +259,22 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}',
                         'X-HTTP-Method-Override': 'DELETE',
                         'Accept': 'application/json'
-                    },
+                    }
                 })
-                .then(res => res.json())
+                .then(resp => resp.json())
                 .then(data => {
                     if (data.success) {
-                        document.getElementById('mainProfilePreview').src =
-                            "{{ asset('Backend/assets/images/faces/face15.jpg') }}";
-                        let overviewImg = document.getElementById('overviewProfileImg');
-                        if (overviewImg) overviewImg.src = "{{ asset('Backend/assets/images/faces/face15.jpg') }}";
+                        // Revert to fallback image after delete
+                        const defaultImg = "{{ asset('backend/assets/images/faces/face15.jpg') }}";
+                        document.getElementById('mainProfilePreview').src = defaultImg;
+                        const overviewImg = document.getElementById('overviewProfileImg');
+                        if (overviewImg) overviewImg.src = defaultImg;
                         toastr.success('Profile image deleted!', 'Success');
                     } else {
                         toastr.error('Could not delete image.', 'Error');
                     }
                 })
-                .catch(err => {
-                    console.error(err);
-                    toastr.error('Could not delete image.', 'Error');
-                });
+                .catch(() => toastr.error('Could not delete image.', 'Error'));
         }
     </script>
-@endsection
+@endpush
