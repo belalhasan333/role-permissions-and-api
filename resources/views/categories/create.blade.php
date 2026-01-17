@@ -74,6 +74,7 @@
             </div>
 
 
+
             {{-- Submit Button --}}
             <div class="col-xs-12 col-sm-12 col-md-12 text-center">
                 <button type="submit" class="btn btn-primary btn-sm mb-3 mt-2">
@@ -107,5 +108,20 @@
             .catch(error => {
                 console.error('CKEditor error:', error);
             });
+    </script>
+    {{-- image upload --}}
+    <script>
+        document.getElementById('image').addEventListener('change', function() {
+            let formData = new FormData();
+            formData.append('image', this.files[0]);
+            formData.append('_token', '{{ csrf_token() }}');
+
+            fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => console.log(data));
+        });
     </script>
 @endpush

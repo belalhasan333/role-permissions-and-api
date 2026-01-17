@@ -29,23 +29,23 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id, // avoid duplicate emails
+            'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:255',
             'company' => 'nullable|string|max:255',
             'job' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'about' => 'nullable|string',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_image'    => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
         ]);
 
-        // Handle profile image if uploaded
+        // Handle profile image upload if present
         if ($request->hasFile('profile_image')) {
             $this->deleteOldImage($user);
 
-            $image = $request->file('profile_image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->storeAs('public/profile', $imageName);
+            $file = $request->file('profile_image');
+            $imageName = uniqid('profile_', true) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('profile', $imageName, 'public');
             $user->profile_image = $imageName;
         }
 
@@ -59,7 +59,8 @@ class ProfileController extends Controller
             'country' => $validated['country'] ?? null,
             'address' => $validated['address'] ?? null,
             'about' => $validated['about'] ?? null,
-        ])->save();
+        ]);
+        $user->save();
 
         return redirect()->route('profile.index')->with('success', 'Profile updated successfully');
     }
@@ -110,16 +111,15 @@ class ProfileController extends Controller
     public function updateImage(Request $request)
     {
         $request->validate([
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $user = Auth::user();
         $this->deleteOldImage($user);
 
-        $image = $request->file('profile_image');
-        $imageName = time() . '_' . $image->getClientOriginalName();
-        $image->storeAs('public/profile', $imageName);
-
+        $file = $request->file('profile_image');
+        $imageName = uniqid('profile_', true) . '.' . $file->getClientOriginalExtension();
+        $file->storeAs('profile', $imageName, 'public');
         $user->profile_image = $imageName;
         $user->save();
 

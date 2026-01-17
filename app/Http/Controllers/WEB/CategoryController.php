@@ -59,7 +59,6 @@ class CategoryController extends Controller
                             <i class="fa-solid fa-list"></i> Show
                          </a>';
 
-                // Fix lint: use auth()->check() and auth()->user() defensively
                 $authUser = auth()->user();
 
                 if ($authUser && $authUser->can('category-edit')) {

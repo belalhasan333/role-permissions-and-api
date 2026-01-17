@@ -13,7 +13,7 @@ Route::prefix('auth')->group(function () {
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     // middleware
-    Route::middleware('jwt.auth')->group(function () {
+    Route::name('api.')->middleware('jwt.auth')->group(function () {
         // auth
         Route::post('logout', [AuthController::class, 'logout']);
         Route::post('refresh', [AuthController::class, 'refresh']);
@@ -23,11 +23,11 @@ Route::prefix('auth')->group(function () {
         Route::put('profile/password', [ProfileController::class, 'changePassword']);
         Route::delete('profile', [ProfileController::class, 'deleteAccount']);
         // category
-        // Route::apiResource('categories', CategoryController::class);
+        Route::apiResource('categories', CategoryController::class);
         // product
-        // Route::apiResource('products', ProductController::class);
+        Route::apiResource('products', ProductController::class);
         // user
-        // Route::apiResource('users', UserController::class);
+        Route::apiResource('users', UserController::class);
         // notification
         Route::get('v1/notifications', [TestController::class, 'index']);
         Route::post('v1/notifications/read/{id}', [TestController::class, 'markAsRead']);
