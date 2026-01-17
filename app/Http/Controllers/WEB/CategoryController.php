@@ -105,7 +105,7 @@ class CategoryController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $users = User::role('subscriber')->get();
+        $users = User::all();
 
         $request->validate([
             'title'       => 'required|string|max:255',
@@ -181,6 +181,9 @@ class CategoryController extends Controller
             'medias'      => $medias,
         ]);
 
+        $users = User::all();
+        Notification::send($users, new NotifyUser($category));
+
         return redirect()->route('categories.index')
             ->with('success', 'Category updated successfully.');
     }
@@ -206,6 +209,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category): RedirectResponse
     {
+        $users = User::all();
+        Notification::send($users, new NotifyUser($category));
         $category->delete();
 
         return redirect()->route('categories.index')

@@ -11,13 +11,16 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 class NotifyUser extends Notification implements ShouldBroadcast
 {
     use Queueable;
-    private $product;
+    private $item;
+    private $type;
+
     /**
      * Create a new notification instance.
      */
-    public function __construct($product)
+    public function __construct($item)
     {
-        $this->product = $product;
+        $this->item = $item;
+        $this->type = class_basename($item);
     }
 
     /**
@@ -44,8 +47,9 @@ class NotifyUser extends Notification implements ShouldBroadcast
     public function toDatabase($notifiable)
     {
         return [
-            'product_id' => $this->product->id,
-            'title'      => $this->product->title,
+            'item_id' => $this->item->id,
+            'type' => $this->type,
+            'title' => "New {$this->type} created: {$this->item->title}",
         ];
     }
     /**
@@ -57,9 +61,10 @@ class NotifyUser extends Notification implements ShouldBroadcast
     public function toArray($notifiable)
     {
         return [
-            'product'    => $this->product->title,
-            'product_id' => $this->product->id,
-            'message'    => "New product created: {$this->product->title}"
+            'item' => $this->item->title,
+            'item_id' => $this->item->id,
+            'type' => $this->type,
+            'message' => "New {$this->type} created: {$this->item->title}"
         ];
     }
 }

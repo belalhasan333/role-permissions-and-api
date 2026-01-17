@@ -17,7 +17,7 @@ class DashboardController extends Controller
                 'label' => 'This Month'
             ],
             'revenue' => [
-                'amount' => 5000,   
+                'amount' => 5000,
                 'growth' => 8,
                 'label' => 'This Month'
             ],

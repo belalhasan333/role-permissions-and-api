@@ -8,6 +8,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Controller;
@@ -80,6 +81,9 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
+        $users = User::all();
+        Notification::send($users, new \App\Notifications\NotifyUser($user));
+
         return redirect()->route('users.index')
             ->with('success', 'User created successfully');
     }
@@ -129,6 +133,9 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', $id)->delete();
         $user->assignRole($request->input('roles'));
 
+        $users = User::all();
+        Notification::send($users, new \App\Notifications\NotifyUser($user));
+
         return redirect()->route('users.index')
             ->with('success', 'User updated successfully');
     }
@@ -138,7 +145,10 @@ class UserController extends Controller
      */
     public function destroy($id): RedirectResponse
     {
-        User::find($id)->delete();
+        $user = User::find($id);
+        $users = User::all();
+        Notification::send($users, new \App\Notifications\NotifyUser($user));
+        $user->delete();
         return redirect()->route('users.index')
             ->with('success', 'User deleted successfully');
     }
