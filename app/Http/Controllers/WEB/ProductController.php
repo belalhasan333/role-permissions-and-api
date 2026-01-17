@@ -94,7 +94,7 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $users = User::all();
+        $users = User::role('subscriber')->get();
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -145,7 +145,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $users = User::all();
+        $users = User::role('subscriber')->get();
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -195,7 +195,7 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
-        $users = User::all();
+        $users = User::role('subscriber')->get();
         Notification::send($users, new NotifyUser($product));
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
