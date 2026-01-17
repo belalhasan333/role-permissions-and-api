@@ -6,13 +6,14 @@ use App\Models\User;
 use Illuminate\View\View;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use App\Notifications\NotifyUser;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 use Spatie\Permission\Models\Role;
-use Yajra\DataTables\Facades\DataTables;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
+use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Facades\Notification;
 
 class UserController extends Controller
 {
@@ -41,14 +42,19 @@ class UserController extends Controller
                 return $roles;
             })
             ->addColumn('action', function ($user) {
-                $show = '<a class="btn btn-info btn-sm" href="' . route('users.show', $user->id) . '">Show</a>';
-                $edit = '<a class="btn btn-primary btn-sm" href="' . route('users.edit', $user->id) . '">Edit</a>';
-                $delete = '<form method="POST" action="' . route('users.destroy', $user->id) . '" style="display:inline-block">'
-                    . csrf_field()
-                    . method_field('DELETE')
-                    . '<button type="submit" class="btn btn-danger btn-sm">Delete</button>'
-                    . '</form>';
-                return $show . ' ' . $edit . ' ' . $delete;
+                $btn = '';
+                $btn .= '<a class="btn btn-info btn-sm" href="' . route('users.show', $user->id) . '">Show</a>';
+                if (auth()->user()->can('user-edit')) {
+                    $btn .= ' <a class="btn btn-primary btn-sm" href="' . route('users.edit', $user->id) . '">Edit</a>';
+                }
+                if (auth()->user()->can('user-delete')) {
+                    $btn .= ' <form method="POST" action="' . route('users.destroy', $user->id) . '" style="display:inline-block">'
+                        . csrf_field()
+                        . method_field('DELETE')
+                        . '<button type="submit" class="btn btn-danger btn-sm">Delete</button>'
+                        . '</form>';
+                }
+                return $btn;
             })
             ->rawColumns(['roles', 'action'])
             ->make(true);
@@ -81,8 +87,8 @@ class UserController extends Controller
         $user = User::create($input);
         $user->assignRole($request->input('roles'));
 
-        $users = User::all();
-        Notification::send($users, new \App\Notifications\NotifyUser($user));
+        $users = User::role('subscriber')->get();
+        Notification::send($users, new NotifyUser($user));
 
         return redirect()->route('users.index')
             ->with('success', 'User created successfully');
@@ -133,8 +139,8 @@ class UserController extends Controller
         DB::table('model_has_roles')->where('model_id', $id)->delete();
         $user->assignRole($request->input('roles'));
 
-        $users = User::all();
-        Notification::send($users, new \App\Notifications\NotifyUser($user));
+        $users = User::role('subscriber')->get();
+        Notification::send($users, new NotifyUser($user));
 
         return redirect()->route('users.index')
             ->with('success', 'User updated successfully');
@@ -146,8 +152,8 @@ class UserController extends Controller
     public function destroy($id): RedirectResponse
     {
         $user = User::find($id);
-        $users = User::all();
-        Notification::send($users, new \App\Notifications\NotifyUser($user));
+        $users = User::role('subscriber')->get();
+        Notification::send($users, new NotifyUser($user));
         $user->delete();
         return redirect()->route('users.index')
             ->with('success', 'User deleted successfully');

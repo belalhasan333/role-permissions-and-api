@@ -158,7 +158,14 @@ class CategoryController extends Controller
         ]);
 
         // Only keep existing medias, then append new uploads
-        $medias = $request->input('existing_medias', $category->medias ?? []);
+        $existingJson = $request->input('existing_medias');
+        if ($existingJson) {
+            $medias = array_map(function ($json) {
+                return json_decode($json, true);
+            }, $existingJson);
+        } else {
+            $medias = $category->medias ?? [];
+        }
 
         if ($request->hasFile('medias')) {
             foreach ($request->file('medias') as $file) {

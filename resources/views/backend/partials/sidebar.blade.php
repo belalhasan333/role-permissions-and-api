@@ -15,8 +15,8 @@
                 <div class="profile-desc">
                     <div class="profile-pic">
                         <div class="count-indicator">
-                            <img class="img-xs rounded-circle"
-                                src="{{ Auth::user()->profile_photo ? asset('storage/' . Auth::user()->profile_photo) : asset('Backend/assets/images/faces/face15.jpg') }}"
+                            <img class="img-xs rounded-circle" id="sidebarProfileImg"
+                                src="{{ Auth::user()->profile_photo ? asset('storage/profile/' . Auth::user()->profile_photo) : asset('Backend/assets/images/faces/face15.jpg') }}"
                                 alt="profile">
                             <span class="count bg-success"></span>
                         </div>
@@ -75,15 +75,17 @@
             </li>
 
             <!-- Users (Web route) -->
+            @can('user-list')
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <span class="menu-icon"><i class="mdi mdi-account-multiple"></i></span>
                     <span class="menu-title">Manage Users</span>
                 </a>
             </li>
+            @endcan
 
             <!-- Roles & Permissions -->
-
+            @can('role-list')
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs(['roles.*', 'permissions.*']) ? 'active' : '' }}"
                     href="{{ route('roles.index') }}">
@@ -91,8 +93,10 @@
                     <span class="menu-title">Manage Roles & Permissions</span>
                 </a>
             </li>
+            @endcan
 
             <!-- Categories (Web route) -->
+            @can('category-list')
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
                     href="{{ route('categories.index') }}">
@@ -100,8 +104,10 @@
                     <span class="menu-title">Manage Categories</span>
                 </a>
             </li>
+            @endcan
 
             <!-- Products (Web route) -->
+            @can('product-list')
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
                     href="{{ route('products.index') }}">
@@ -109,6 +115,7 @@
                     <span class="menu-title">Manage Products</span>
                 </a>
             </li>
+            @endcan
 
             <!-- Orders (No route implemented yet) -->
             <li class="nav-item menu-items">

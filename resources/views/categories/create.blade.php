@@ -70,6 +70,7 @@
                     @error('medias')
                         <span class="text-danger small d-block">{{ $message }}</span>
                     @enderror
+                    <div id="media-previews" class="mt-3 d-flex flex-wrap gap-2"></div>
                 </div>
             </div>
 
@@ -109,19 +110,28 @@
                 console.error('CKEditor error:', error);
             });
     </script>
-    {{-- image upload --}}
+    {{-- image preview --}}
     <script>
-        document.getElementById('image').addEventListener('change', function() {
-            let formData = new FormData();
-            formData.append('image', this.files[0]);
-            formData.append('_token', '{{ csrf_token() }}');
+        document.getElementById('medias').addEventListener('change', function(event) {
+            const previews = document.getElementById('media-previews');
+            previews.innerHTML = ''; // Clear previous previews
 
-            fetch('/upload', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => console.log(data));
+            Array.from(event.target.files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.border = '1px solid #ddd';
+                        img.style.borderRadius = '4px';
+                        previews.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
         });
     </script>
 @endpush

@@ -23,11 +23,11 @@
                                 use Illuminate\Support\Facades\Storage;
 
                                 // Always check for the actual user's image and show it if available, otherwise fallback
-$profileImgSrc =
-    $user->profile_image &&
-    Storage::disk('public')->exists('profile/' . $user->profile_image)
-        ? asset('storage/profile/' . $user->profile_image)
-        : asset('backend/assets/images/faces/face15.jpg');
+                             $profileImgSrc =
+                             $user->profile_photo &&
+                             Storage::disk('public')->exists('profile/' . $user->profile_photo)
+                             ? asset('storage/profile/' . $user->profile_photo)
+                             : asset('backend/assets/images/faces/face15.jpg');
                             @endphp
                             <img id="mainProfilePreview" src="{{ $profileImgSrc }}" alt="Profile"
                                 class="rounded-circle shadow" width="150" height="150" style="object-fit: cover;">
@@ -47,7 +47,7 @@ $profileImgSrc =
                                 </form>
 
                                 {{-- DELETE --}}
-                                @if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image))
+                                @if ($user->profile_photo && Storage::disk('public')->exists('profile/' . $user->profile_photo))
                                     <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
                                         onclick="deleteProfileImage();">
                                         <i class="bi bi-trash me-1"></i> Remove
@@ -219,6 +219,11 @@ $profileImgSrc =
                 document.getElementById('mainProfilePreview').src = e.target.result;
                 const overviewImg = document.getElementById('overviewProfileImg');
                 if (overviewImg) overviewImg.src = e.target.result;
+                // Update navbar and sidebar images instantly
+                const navbarImg = document.getElementById('navbarProfileImg');
+                if (navbarImg) navbarImg.src = e.target.result;
+                const sidebarImg = document.getElementById('sidebarProfileImg');
+                if (sidebarImg) sidebarImg.src = e.target.result;
             };
             reader.readAsDataURL(file);
 
@@ -236,12 +241,17 @@ $profileImgSrc =
                 })
                 .then(resp => resp.json())
                 .then(data => {
-                    if (data.success && data.profile_image_url) {
+                    if (data.success && data.profile_photo_url) {
                         // When the upload is successful, set the new URL with a timestamp to prevent cache
-                        let newImgUrl = data.profile_image_url + '?t=' + Date.now();
+                        let newImgUrl = data.profile_photo_url + '?t=' + Date.now();
                         document.getElementById('mainProfilePreview').src = newImgUrl;
                         const overviewImg = document.getElementById('overviewProfileImg');
                         if (overviewImg) overviewImg.src = newImgUrl;
+                        // Update navbar and sidebar images
+                        const navbarImg = document.getElementById('navbarProfileImg');
+                        if (navbarImg) navbarImg.src = newImgUrl;
+                        const sidebarImg = document.getElementById('sidebarProfileImg');
+                        if (sidebarImg) sidebarImg.src = newImgUrl;
                         toastr.success('Profile image updated!', 'Success');
                     } else {
                         toastr.error('Could not update image.', 'Error');
@@ -269,6 +279,11 @@ $profileImgSrc =
                         document.getElementById('mainProfilePreview').src = defaultImg;
                         const overviewImg = document.getElementById('overviewProfileImg');
                         if (overviewImg) overviewImg.src = defaultImg;
+                        // Update navbar and sidebar images
+                        const navbarImg = document.getElementById('navbarProfileImg');
+                        if (navbarImg) navbarImg.src = defaultImg;
+                        const sidebarImg = document.getElementById('sidebarProfileImg');
+                        if (sidebarImg) sidebarImg.src = defaultImg;
                         toastr.success('Profile image deleted!', 'Success');
                     } else {
                         toastr.error('Could not delete image.', 'Error');

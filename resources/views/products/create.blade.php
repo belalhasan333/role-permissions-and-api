@@ -94,11 +94,12 @@
             <div class="col-xs-12 col-sm-12 col-md-12">
                 <div class="form-group">
                     <strong>Product Images:</strong>
-                    <input type="file" name="medias[]" class="form-control" multiple accept="image/*">
+                    <input type="file" name="medias[]" id="medias" class="form-control" multiple accept="image/*">
                     <div class="form-text"><small>Accepts jpg, jpeg, png, webp up to 20MB each</small></div>
                     @error('medias')
                         <span class="text-danger">{{ $message }}</span>
                     @enderror
+                    <div id="media-previews" class="mt-3 d-flex flex-wrap gap-2"></div>
                 </div>
             </div>
 
@@ -136,5 +137,29 @@
             .catch(error => {
                 console.error('CKEditor error:', error);
             });
+    </script>
+    {{-- image preview --}}
+    <script>
+        document.getElementById('medias').addEventListener('change', function(event) {
+            const previews = document.getElementById('media-previews');
+            previews.innerHTML = ''; // Clear previous previews
+
+            Array.from(event.target.files).forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100px';
+                        img.style.height = '100px';
+                        img.style.objectFit = 'cover';
+                        img.style.border = '1px solid #ddd';
+                        img.style.borderRadius = '4px';
+                        previews.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        });
     </script>
 @endpush

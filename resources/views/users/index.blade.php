@@ -6,7 +6,9 @@
             <h2>Users Management</h2>
         </div>
         <div class="col-md-6 text-end">
-            <a class="btn btn-success" href="{{ route('users.create') }}">Create New User</a>
+            @can('user-create')
+                <a class="btn btn-success" href="{{ route('users.create') }}">Create New User</a>
+            @endcan
         </div>
     </div>
 

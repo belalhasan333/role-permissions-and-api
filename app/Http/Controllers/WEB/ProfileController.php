@@ -36,17 +36,17 @@ class ProfileController extends Controller
             'country' => 'nullable|string|max:255',
             'address' => 'nullable|string|max:255',
             'about' => 'nullable|string',
-            'profile_image'    => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
+            'profile_photo'    => 'nullable|file|mimes:jpg,jpeg,png,webp|max:20480',
         ]);
 
         // Handle profile image upload if present
-        if ($request->hasFile('profile_image')) {
+        if ($request->hasFile('profile_photo')) {
             $this->deleteOldImage($user);
 
-            $file = $request->file('profile_image');
+            $file = $request->file('profile_photo');
             $imageName = uniqid('profile_', true) . '.' . $file->getClientOriginalExtension();
             $file->storeAs('profile', $imageName, 'public');
-            $user->profile_image = $imageName;
+            $user->profile_photo = $imageName;
         }
 
         // Update other fields
@@ -111,21 +111,21 @@ class ProfileController extends Controller
     public function updateImage(Request $request)
     {
         $request->validate([
-            'profile_image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
 
         $user = Auth::user();
         $this->deleteOldImage($user);
 
-        $file = $request->file('profile_image');
+        $file = $request->file('profile_photo');
         $imageName = uniqid('profile_', true) . '.' . $file->getClientOriginalExtension();
         $file->storeAs('profile', $imageName, 'public');
-        $user->profile_image = $imageName;
+        $user->profile_photo = $imageName;
         $user->save();
 
         return response()->json([
             'success' => true,
-            'profile_image_url' => asset('storage/profile/' . $imageName)
+            'profile_photo_url' => asset('storage/profile/' . $imageName)
         ]);
     }
 
@@ -134,8 +134,8 @@ class ProfileController extends Controller
      */
     private function deleteOldImage($user)
     {
-        if ($user->profile_image && Storage::disk('public')->exists('profile/' . $user->profile_image)) {
-            Storage::disk('public')->delete('profile/' . $user->profile_image);
+        if ($user->profile_photo && Storage::disk('public')->exists('profile/' . $user->profile_photo)) {
+            Storage::disk('public')->delete('profile/' . $user->profile_photo);
         }
     }
 }

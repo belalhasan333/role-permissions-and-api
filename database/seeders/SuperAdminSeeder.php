@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class SuperAdminSeeder extends Seeder
 {
@@ -33,5 +34,9 @@ class SuperAdminSeeder extends Seeder
 
         $user->assignRole($webRole);
         $user->assignRole($apiRole);
+
+        // Assign all permissions to superadmin
+        $permissions = Permission::where('guard_name', 'web')->get();
+        $webRole->syncPermissions($permissions);
     }
 }

@@ -94,7 +94,7 @@ class ProductController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $user = User::all();
+        $users = User::all();
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -126,7 +126,7 @@ class ProductController extends Controller
             'medias'      => $medias,
         ]);
 
-        Notification::send($user, new \App\Notifications\NotifyUser($product));
+        Notification::send($users, new NotifyUser($product));
 
         return redirect()->route('products.index')->with('success', 'Product created successfully.');
     }
@@ -145,7 +145,7 @@ class ProductController extends Controller
 
     public function update(Request $request, Product $product): RedirectResponse
     {
-        $user = User::all();
+        $users = User::all();
 
         $request->validate([
             'category_id' => 'required|exists:categories,id',
@@ -159,7 +159,14 @@ class ProductController extends Controller
         ]);
 
         // Start with existing medias
-        $medias = $request->existing_medias ?? $product->medias ?? [];
+        $existingJson = $request->input('existing_medias');
+        if ($existingJson) {
+            $medias = array_map(function ($json) {
+                return json_decode($json, true);
+            }, $existingJson);
+        } else {
+            $medias = $product->medias ?? [];
+        }
 
         // Add new uploads if any
         if ($request->hasFile('medias')) {
@@ -181,7 +188,7 @@ class ProductController extends Controller
             'medias'      => $medias,
         ]);
 
-        Notification::send($user, new \App\Notifications\NotifyUser($product));
+        Notification::send($users, new NotifyUser($product));
 
         return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
@@ -189,7 +196,7 @@ class ProductController extends Controller
     public function destroy(Product $product): RedirectResponse
     {
         $users = User::all();
-        Notification::send($users, new \App\Notifications\NotifyUser($product));
+        Notification::send($users, new NotifyUser($product));
         $product->delete();
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
     }
