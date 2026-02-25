@@ -19,10 +19,10 @@ Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
 Auth::routes();
 
-Route::get('/home', [DashboardController::class, 'index'])->name('dashboard');
+
 
 Route::middleware(['auth'])->group(function () {
-
+    Route::get('/home', [DashboardController::class, 'index'])->name('dashboard');
     // Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('profile.update');

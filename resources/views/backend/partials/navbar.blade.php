@@ -112,7 +112,7 @@
 
                 <li class="nav-item dropdown border-left">
                     @php
-                        $unreadCount = auth()->user()->unreadNotifications->count();
+                        $unreadCount = auth()->check() ? auth()->user()->unreadNotifications->count() : 0;
                     @endphp
 
                     <a class="nav-link count-indicator dropdown-toggle position-relative" id="notificationDropdown"
