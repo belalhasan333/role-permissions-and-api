@@ -113,7 +113,7 @@
                                 <input type="hidden" name="existing_medias[{{ $i }}]"
                                     value='{{ json_encode($media) }}'>
                                 @if (!empty($media['url']))
-                                    <img src="{{ str_starts_with($media['url'], ['/', 's']) ? asset($media['url']) : asset('storage/' . $media['url']) }}"
+                                    <img src="{{ asset($media['url']) }}"
                                         style="height:50px;width:70px;object-fit:cover;border-radius:6px;margin-right:4px;">
                                 @endif
                             @endforeach
