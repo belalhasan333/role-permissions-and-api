@@ -76,45 +76,45 @@
 
             <!-- Users (Web route) -->
             @can('user-list')
-            <li class="nav-item menu-items">
-                <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                    <span class="menu-icon"><i class="mdi mdi-account-multiple"></i></span>
-                    <span class="menu-title">Manage Users</span>
-                </a>
-            </li>
+                <li class="nav-item menu-items">
+                    <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <span class="menu-icon"><i class="mdi mdi-account-multiple"></i></span>
+                        <span class="menu-title">Manage Users</span>
+                    </a>
+                </li>
             @endcan
 
             <!-- Roles & Permissions -->
             @can('role-list')
-            <li class="nav-item menu-items">
-                <a class="nav-link {{ request()->routeIs(['roles.*', 'permissions.*']) ? 'active' : '' }}"
-                    href="{{ route('roles.index') }}">
-                    <span class="menu-icon"><i class="mdi mdi-shield-account"></i></span>
-                    <span class="menu-title">Manage Roles & Permissions</span>
-                </a>
-            </li>
+                <li class="nav-item menu-items">
+                    <a class="nav-link {{ request()->routeIs(['roles.*', 'permissions.*']) ? 'active' : '' }}"
+                        href="{{ route('roles.index') }}">
+                        <span class="menu-icon"><i class="mdi mdi-shield-account"></i></span>
+                        <span class="menu-title">Manage Roles & Permissions</span>
+                    </a>
+                </li>
             @endcan
 
             <!-- Categories (Web route) -->
             @can('category-list')
-            <li class="nav-item menu-items">
-                <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
-                    href="{{ route('categories.index') }}">
-                    <span class="menu-icon"><i class="mdi mdi-folder-multiple"></i></span>
-                    <span class="menu-title">Manage Categories</span>
-                </a>
-            </li>
+                <li class="nav-item menu-items">
+                    <a class="nav-link {{ request()->routeIs('categories.*') ? 'active' : '' }}"
+                        href="{{ route('categories.index') }}">
+                        <span class="menu-icon"><i class="mdi mdi-folder-multiple"></i></span>
+                        <span class="menu-title">Manage Categories</span>
+                    </a>
+                </li>
             @endcan
 
             <!-- Products (Web route) -->
             @can('product-list')
-            <li class="nav-item menu-items">
-                <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
-                    href="{{ route('products.index') }}">
-                    <span class="menu-icon"><i class="mdi mdi-book-open-variant"></i></span>
-                    <span class="menu-title">Manage Products</span>
-                </a>
-            </li>
+                <li class="nav-item menu-items">
+                    <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}"
+                        href="{{ route('products.index') }}">
+                        <span class="menu-icon"><i class="mdi mdi-book-open-variant"></i></span>
+                        <span class="menu-title">Manage Products</span>
+                    </a>
+                </li>
             @endcan
 
             <!-- Orders (No route implemented yet) -->
@@ -139,7 +139,7 @@
             <li class="nav-item menu-items">
                 <a class="nav-link" data-toggle="collapse" href="#settingsMenu"
                     aria-expanded="{{ request()->routeIs(['settings.*', 'smtp.*']) ? 'true' : 'false' }}">
-                    <span class="menu-icon"><i class="mdi mdi-cog"></i></span>
+                    <span class="menu-icon"><i class="mdi mdi-settings"></i></span>
                     <span class="menu-title">Settings</span>
                     <i class="menu-arrow"></i>
                 </a>

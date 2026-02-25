@@ -2,6 +2,7 @@
 
 @push('styles')
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 @endpush
 
 @section('content')
@@ -40,7 +41,8 @@ $profileImgSrc =
                                     @csrf
                                     <label for="profile_photo_upload" class="btn btn-primary btn-sm rounded-pill px-4 py-2"
                                         style="cursor: pointer;">
-                                        <i class="bi bi-upload me-1"></i> Change
+                                        <i class="fa-solid fa-upload"></i>
+                                        {{-- <i class="bi bi-upload me-1">upload</i> --}}
                                     </label>
                                     <input type="file" id="profile_photo_upload" name="profile_photo" accept="image/*"
                                         style="display: none;" onchange="previewAndUpload(this);">
@@ -50,7 +52,8 @@ $profileImgSrc =
                                 @if ($user->profile_photo && Storage::disk('public')->exists('profile/' . $user->profile_photo))
                                     <button type="button" class="btn btn-danger btn-sm rounded-pill px-4 py-2"
                                         onclick="deleteProfileImage();">
-                                        <i class="bi bi-trash me-1"></i> Remove
+                                        <i class="fa-solid fa-trash"></i>
+                                        {{-- <i class="bi bi-trash me-1"></i> Remove --}}
                                     </button>
                                 @endif
                             </div>
@@ -60,10 +63,15 @@ $profileImgSrc =
                         <h3>{{ $user->job ?? 'Web Developer' }}</h3>
 
                         <div class="social-links mt-2">
-                            <a href="{{ $user->twitter ?? '#' }}" class="twitter"><i class="bi bi-twitter"></i></a>
-                            <a href="{{ $user->facebook ?? '#' }}" class="facebook"><i class="bi bi-facebook"></i></a>
-                            <a href="{{ $user->instagram ?? '#' }}" class="instagram"><i class="bi bi-instagram"></i></a>
-                            <a href="{{ $user->linkedin ?? '#' }}" class="linkedin"><i class="bi bi-linkedin"></i></a>
+                            <i class="fa-brands fa-twitter" style="cursor: pointer"><a href="{{ $user->twitter ?? '#' }}"
+                                    class="twitter"></a></i>
+                            <i class="fa-brands fa-facebook" style="cursor: pointer"><a href="{{ $user->facebook ?? '#' }}"
+                                    class="facebook"></a></i>
+                            <i class="fa-brands fa-instagram" style="cursor: pointer"><a
+                                    href="{{ $user->instagram ?? '#' }}" class="instagram"></a></i>
+
+                            <i class="fa-brands fa-linkedin"style="cursor: pointer"><a href="{{ $user->linkedin ?? '#' }}"
+                                    class="linkedin"></a></i>
                         </div>
 
                     </div>
