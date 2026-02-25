@@ -69,7 +69,7 @@
             <!-- Dashboard -->
             <li class="nav-item menu-items">
                 <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                    <span class="menu-icon"><i class="mdi mdi-speedometer"></i></span>
+                    <span class="menu-icon"><i class="mdi mdi-home"></i></span>
                     <span class="menu-title">Dashboard</span>
                 </a>
             </li>
