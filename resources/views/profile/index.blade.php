@@ -23,11 +23,11 @@
                                 use Illuminate\Support\Facades\Storage;
 
                                 // Always check for the actual user's image and show it if available, otherwise fallback
-                             $profileImgSrc =
-                             $user->profile_photo &&
-                             Storage::disk('public')->exists('profile/' . $user->profile_photo)
-                             ? asset('storage/profile/' . $user->profile_photo)
-                             : asset('backend/assets/images/faces/face15.jpg');
+$profileImgSrc =
+    $user->profile_photo &&
+    Storage::disk('public')->exists('profile/' . $user->profile_photo)
+        ? asset('storage/profile/' . $user->profile_photo)
+        : asset('backend/assets/images/faces/face15.jpg');
                             @endphp
                             <img id="mainProfilePreview" src="{{ $profileImgSrc }}" alt="Profile"
                                 class="rounded-circle shadow" width="150" height="150" style="object-fit: cover;">
@@ -38,11 +38,11 @@
                                 <form id="uploadProfileForm" action="{{ route('profile.image.update') }}" method="POST"
                                     enctype="multipart/form-data" class="d-inline">
                                     @csrf
-                                    <label for="profile_image_upload" class="btn btn-primary btn-sm rounded-pill px-4 py-2"
+                                    <label for="profile_photo_upload" class="btn btn-primary btn-sm rounded-pill px-4 py-2"
                                         style="cursor: pointer;">
                                         <i class="bi bi-upload me-1"></i> Change
                                     </label>
-                                    <input type="file" id="profile_image_upload" name="profile_image" accept="image/*"
+                                    <input type="file" id="profile_photo_upload" name="profile_photo" accept="image/*"
                                         style="display: none;" onchange="previewAndUpload(this);">
                                 </form>
 
@@ -229,7 +229,7 @@
 
             // Upload via AJAX and update image with new URL so always shows the latest uploaded file
             const formData = new FormData();
-            formData.append('profile_image', file);
+            formData.append('profile_photo', file);
 
             fetch("{{ route('profile.image.update') }}", {
                     method: 'POST',

@@ -113,7 +113,6 @@ class ProfileController extends Controller
         $request->validate([
             'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ]);
-
         $user = Auth::user();
         $this->deleteOldImage($user);
 

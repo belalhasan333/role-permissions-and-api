@@ -33,13 +33,13 @@ class UserPolicy
 
     public function update(User $user, User $model): bool
     {
-        // নিজেকে edit করতে পারবে বা permission থাকলে
+
         return $user->can('user-edit') || $user->id === $model->id;
     }
 
     public function delete(User $user, User $model): bool
     {
-        // নিজেকে delete করা যাবে না
+
         if ($user->id === $model->id) {
             return false;
         }
