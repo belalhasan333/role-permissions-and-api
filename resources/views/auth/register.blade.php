@@ -25,7 +25,7 @@
 
                             <h3 class="card-title text-left mb-3">Register</h3>
 
-                            {{-- ✅ Laravel Default Register Form --}}
+                            {{--  Laravel Default Register Form --}}
                             <form method="POST" action="{{ route('register') }}">
                                 @csrf
 
@@ -81,15 +81,16 @@
                                 </p>
 
                             </form>
-                            {{-- ✅ End Register Form --}}
+                            {{-- End Register Form --}}
                             <div class="d-flex mt-3">
+                                <a href="{{ url('/auth/google') }}" class="btn btn-google col">
+                                    <i class="mdi mdi-google-plus"></i> Google
+                                </a>
                                 <a href="{{ url('/auth/facebook') }}" class="btn btn-facebook col mr-2">
                                     <i class="mdi mdi-facebook"></i> Facebook
                                 </a>
 
-                                <a href="{{ url('/auth/google') }}" class="btn btn-google col">
-                                    <i class="mdi mdi-google-plus"></i> Google
-                                </a>
+
                             </div>
 
                         </div>

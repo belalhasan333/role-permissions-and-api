@@ -18,7 +18,9 @@ return new class extends Migration
             $table->string('job')->nullable();
             $table->string('country')->nullable();
             $table->text('about')->nullable();
-            $table->string('profile_image')->nullable()->before('name');
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable();
+            $table->string('profile_photo')->nullable()->before('name');
         });
     }
 

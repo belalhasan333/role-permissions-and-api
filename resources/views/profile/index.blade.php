@@ -65,7 +65,7 @@ $profileImgSrc =
                         <div class="social-links mt-2">
                             <i class="fa-brands fa-twitter" style="cursor: pointer"><a href="{{ $user->twitter ?? '#' }}"
                                     class="twitter"></a></i>
-                            <i class="fa-brands fa-facebook" style="cursor: pointer"><a href="{{ $user->facebook ?? '#' }}"
+                            <i class="fa-brands fa-facebook" style="cursor: pointer"><a href="https://www.facebook.com/"
                                     class="facebook"></a></i>
                             <i class="fa-brands fa-instagram" style="cursor: pointer"><a
                                     href="{{ $user->instagram ?? '#' }}" class="instagram"></a></i>

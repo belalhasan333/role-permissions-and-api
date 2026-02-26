@@ -1,15 +1,19 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\TestController;
-use App\Http\Controllers\API\UserController;
+use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\ProfileController;
-use App\Http\Controllers\API\CategoryController;
+use App\Http\Controllers\API\SocialLoginController;
+use App\Http\Controllers\API\TestController;
+use App\Http\Controllers\API\UserController;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->group(function () {
     // auth
+    Route::post('v1/social-login', [SocialLoginController::class, 'SocialLogin']);
+
+
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
     // middleware

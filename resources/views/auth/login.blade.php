@@ -25,7 +25,7 @@
 
                             <h3 class="card-title text-left mb-3">Login</h3>
 
-                            {{-- ✅ Laravel Default Login Form --}}
+                            {{-- Laravel Default Login Form --}}
                             <form method="POST" action="{{ route('login') }}">
                                 @csrf
 
@@ -33,8 +33,7 @@
                                 <div class="form-group">
                                     <label>Email *</label>
                                     <input type="email" name="email" value="{{ old('email') }}"
-                                        class="form-control p_input @error('email') is-invalid @enderror" required
-                                        autofocus>
+                                        class="form-control p_input @error('email') is-invalid @enderror" autofocus>
 
                                     @error('email')
                                         <span class="text-danger small">{{ $message }}</span>
@@ -45,7 +44,7 @@
                                 <div class="form-group">
                                     <label>Password *</label>
                                     <input type="password" name="password"
-                                        class="form-control p_input @error('password') is-invalid @enderror" required>
+                                        class="form-control p_input @error('password') is-invalid @enderror">
 
                                     @error('password')
                                         <span class="text-danger small">{{ $message }}</span>
@@ -75,9 +74,20 @@
                                         Login
                                     </button>
                                 </div>
+                                {{-- Socialite login --}}
+                                <div class="d-flex mt-3">
+                                    <a href="{{ route('social.redirect', ['provider' => 'google']) }}"
+                                        class="btn btn-google col">
+                                        <i class="mdi mdi-google-plus"></i> Google
+                                    </a>
 
+                                    <a href="{{ route('social.redirect', ['provider' => 'facebook']) }}"
+                                        class="btn btn-facebook ml-2 col">
+                                        <i class="mdi mdi-facebook"></i> Facebook
+                                    </a>
+                                </div>
                             </form>
-                            {{-- ✅ End Login Form --}}
+                            {{-- End Login Form --}}
 
                         </div>
                     </div>

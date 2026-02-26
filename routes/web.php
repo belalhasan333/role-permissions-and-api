@@ -15,8 +15,8 @@ use App\Http\Controllers\WEB\NotificationController;
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect']);
-Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
+Route::get('/auth/{provider}', [SocialAuthController::class, 'redirect'])->name('social.redirect');
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 Auth::routes();
 
 
